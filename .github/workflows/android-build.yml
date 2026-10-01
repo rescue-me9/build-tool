@@ -55,19 +55,24 @@ jobs:
         run: |
           set -e
           APK=app/build/outputs/apk/release/app-release-unsigned.apk
-          if [ -f "$APK" ]; then
-            SIGNED=app/build/outputs/apk/release/app-release.apk
-            cp "$APK" "$SIGNED"
-            "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign \
-              --ks "$HOME/.android/debug.keystore" \
-              --ks-pass pass:android \
-              --ks-key-alias androiddebugkey \
-              --key-pass pass:android \
-              --out "$SIGNED" "$SIGNED"
-            echo "signed-apk=$SIGNED" >> "$GITHUB_ENV"
-          else
-            echo "no-unsigned-found=true" >> "$GITHUB_ENV"
+          [ -f "$APK" ] || APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          SIGNED=app/build/outputs/apk/release/app-release.apk
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            mkdir -p "$HOME/.android"
+            keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -keypass android -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
           fi
+          cp "$APK" "$SIGNED"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign \
+            --ks "$HOME/.android/debug.keystore" \
+            --ks-pass pass:android \
+            --ks-key-alias androiddebugkey \
+            --key-pass pass:android \
+            --out "$SIGNED" "$SIGNED"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$SIGNED"
+          ls -la app/build/outputs/apk/release/
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
