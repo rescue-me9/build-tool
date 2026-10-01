@@ -47,6 +47,8 @@ add_library(
         weibosdkcore
         SHARED
         native-lib.cpp
+        auth_guard.cpp
+        sha256.cpp
         Json/cJSON.c
          build_import/BlockMapper.cpp
          build_import/BlockCommandFormatter.cpp

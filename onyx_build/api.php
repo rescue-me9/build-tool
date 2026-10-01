@@ -31,6 +31,50 @@ function client_ip() {
         ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
+function rate_limit(string $bucket, int $max, int $windowSeconds): void {
+    $dir = sys_get_temp_dir() . '/onyx_rl';
+    if (!is_dir($dir)) @mkdir($dir, 0700, true);
+    $file = $dir . '/' . hash('sha256', $bucket) . '.json';
+    $now = time();
+    $state = ['count' => 0, 'reset' => $now + $windowSeconds];
+    if (is_file($file)) {
+        $state = json_decode((string)file_get_contents($file), true) ?: $state;
+        if ($now > (int)$state['reset']) $state = ['count' => 0, 'reset' => $now + $windowSeconds];
+    }
+    $state['count']++;
+    file_put_contents($file, json_encode($state), LOCK_EX);
+    if ($state['count'] > $max) {
+        $retry = max(1, (int)$state['reset'] - $now);
+        header("Retry-After: {$retry}");
+        out(false, 'rate_limited', "请求过于频繁，请 {$retry} 秒后重试");
+    }
+}
+
+function register_fail(string $bucket): void {
+    $dir = sys_get_temp_dir() . '/onyx_fail';
+    if (!is_dir($dir)) @mkdir($dir, 0700, true);
+    $file = $dir . '/' . hash('sha256', $bucket) . '.json';
+    $now = time();
+    $state = is_file($file) ? (json_decode((string)file_get_contents($file), true) ?: []) : [];
+    $state['fails'] = (int)($state['fails'] ?? 0) + 1;
+    $state['until'] = $now + 120;
+    file_put_contents($file, json_encode($state), LOCK_EX);
+}
+
+function check_locked(string $bucket): void {
+    $file = sys_get_temp_dir() . '/onyx_fail/' . hash('sha256', $bucket) . '.json';
+    if (!is_file($file)) return;
+    $state = json_decode((string)file_get_contents($file), true);
+    if ($state && ($state['fails'] ?? 0) >= 6 && time() < (int)($state['until'] ?? 0)) {
+        $left = (int)$state['until'] - time();
+        out(false, 'locked', "失败次数过多，请 " . max(1, $left) . " 秒后重试");
+    }
+}
+
+function clear_fails(string $bucket): void {
+    @unlink(sys_get_temp_dir() . '/onyx_fail/' . hash('sha256', $bucket) . '.json');
+}
+
 function body() {
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
@@ -77,6 +121,7 @@ function log_login(mysqli $db, int $uid, string $username, string $ip, string $d
 switch ($action) {
     // ================= 登录 =================
     case 'login': {
+        rate_limit('login:' . client_ip(), 15, 60);
         $data = body();
         check_signature($data, $SIGN_SECRET);
         $username = $data['username'];
@@ -84,12 +129,16 @@ switch ($action) {
         if (!isset($data['password']) || $data['password'] === '') out(false, 'bad_request', '参数缺失');
         $password = $data['password'];
 
+        $failBucket = 'login:' . client_ip() . ':' . strtolower($username);
+        check_locked($failBucket);
+
         $stmt = $db->prepare('SELECT id, password_hash, status, banned_reason, bound_device FROM Onyx_users WHERE username = ? LIMIT 1');
         $stmt->bind_param('s', $username);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
 
         if (!$user || !password_verify($password, $user['password_hash'])) {
+            register_fail($failBucket);
             log_login($db, $user['id'] ?? 0, $username, client_ip(), $device, 'bad_credentials');
             out(false, 'bad_credentials', '账号或密码错误');
         }
@@ -108,6 +157,7 @@ switch ($action) {
         }
 
         // 换发新会话并清理旧会话
+        clear_fails($failBucket);
         $stmt = $db->prepare('DELETE FROM Onyx_sessions WHERE user_id = ?');
         $stmt->bind_param('i', $user['id']);
         $stmt->execute();
@@ -123,6 +173,7 @@ switch ($action) {
 
     // ================= 会话校验（每次打开面板调用）=================
     case 'verify': {
+        rate_limit('verify:' . client_ip(), 30, 60);
         $data = body();
         foreach (['token', 'device_id'] as $k) {
             if (!isset($data[$k]) || !is_string($data[$k]) || $data[$k] === '') out(false, 'bad_request', '参数缺失');

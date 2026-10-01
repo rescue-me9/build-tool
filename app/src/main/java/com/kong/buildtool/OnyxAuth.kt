@@ -42,8 +42,6 @@ import org.json.JSONObject
  */
 object OnyxAuth {
     private const val API = "https://pw.5w.pw/onyx_build/api.php"
-    // 与 server/api.php 的 $SIGN_SECRET 一致
-    private const val SIGN_SECRET = "OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH'!-Ipo-OnYx_Build_J-Top£"
     private const val PREFS = "onyx_auth"
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "username"
@@ -209,7 +207,7 @@ object OnyxAuth {
             Thread({
                 val ts = System.currentTimeMillis() / 1000
                 val device = deviceId(context)
-                val sign = sha256(username + device + ts + SIGN_SECRET)
+                val sign = AuthGuard.sign(username, device, ts)
                 val result = post(mapOf(
                     "username" to username,
                     "password" to password,
