@@ -2,19 +2,22 @@
 /**
  * Onyx_build 授权后端。部署到 https://pw.5w.pw/onyx/api.php
  * 数据库表前缀: Onyx_
+ * 配置由 install.php 生成的 config.php 提供。
  */
 
-// ==== 部署时必须修改 ====
-$DB_HOST = 'localhost';
-$DB_NAME = 'lvbkblij';
-$DB_USER = 'lvbkblij';
-$DB_PASS = 'aDaP24gG';
-// 管理接口密钥（客户端不可见，仅管理员工具使用）
-$ADMIN_KEY = 'OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH\'!-Ipo-OnYx_Build_J-Top£';
-// 请求签名盐：与客户端 OnyxAuth.kt 中的 SECRET 一致，用于提高伪造请求门槛
-$SIGN_SECRET = 'OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH\'!-Ipo-OnYx_Build_J-Top£';
-// 会话有效期（秒）
-$SESSION_TTL = 86400 * 7;
+if (!file_exists(__DIR__ . '/config.php')) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false, 'code' => 'not_installed', 'msg' => '后端未安装，请先运行 install.php']);
+    exit;
+}
+require_once __DIR__ . '/config.php';
+$DB_HOST = ONYX_DB_HOST;
+$DB_NAME = ONYX_DB_NAME;
+$DB_USER = ONYX_DB_USER;
+$DB_PASS = ONYX_DB_PASS;
+$ADMIN_KEY = ONYX_ADMIN_KEY;
+$SIGN_SECRET = ONYX_SIGN_SECRET;
+$SESSION_TTL = ONYX_SESSION_TTL;
 
 header('Content-Type: application/json; charset=utf-8');
 
