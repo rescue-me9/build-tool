@@ -207,7 +207,7 @@ object OnyxAuth {
             Thread({
                 val ts = System.currentTimeMillis() / 1000
                 val device = deviceId(context)
-                val sign = AuthGuard.sign(username, device, ts)
+                val sign = AuthGuard.sign(username, device, ts.toString())
                 val result = post(mapOf(
                     "username" to username,
                     "password" to password,
