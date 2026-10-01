@@ -9,12 +9,6 @@
 require_once __DIR__ . '/config.php';
 
 $isCli = PHP_SAPI === 'cli';
-if (!$isCli && ($_GET['key'] ?? '') !== ONYX_ADMIN_KEY) {
-    http_response_code(403);
-    exit('<meta charset="utf-8">缺少或错误的 key 参数：import.php?key=你的ADMIN_KEY');
-}
-
-$sqlFile = __DIR__ . '/onyx.sql';
 if (!is_file($sqlFile)) exit("找不到 {$sqlFile}\n");
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
