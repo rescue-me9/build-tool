@@ -1,0 +1,77 @@
+name: Android Build (Release APK)
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Enable Gradle wrapper to run
+        run: chmod +x ./gradlew
+
+      - name: Set up Android SDK & NDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager --install \
+            "platforms;android-37" \
+            "build-tools;36.0.0" \
+            "ndk;26.1.10909125" \
+            "platform-tools"
+
+      - name: Write local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
+
+      - name: Make sure Gradle can resolve assets/build chain
+        run: cat local.properties
+
+      - name: Build Release APK
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Sign unsigned release APK with debug keystore
+        if: success()
+        run: |
+          set -e
+          APK=app/build/outputs/apk/release/app-release-unsigned.apk
+          if [ -f "$APK" ]; then
+            SIGNED=app/build/outputs/apk/release/app-release.apk
+            cp "$APK" "$SIGNED"
+            "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign \
+              --ks "$HOME/.android/debug.keystore" \
+              --ks-pass pass:android \
+              --ks-key-alias androiddebugkey \
+              --key-pass pass:android \
+              --out "$SIGNED" "$SIGNED"
+            echo "signed-apk=$SIGNED" >> "$GITHUB_ENV"
+          else
+            echo "no-unsigned-found=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
