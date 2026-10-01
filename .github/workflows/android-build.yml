@@ -44,8 +44,8 @@ jobs:
       - name: Write local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
           cat local.properties
+          ls "$ANDROID_HOME/ndk" || true
 
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
