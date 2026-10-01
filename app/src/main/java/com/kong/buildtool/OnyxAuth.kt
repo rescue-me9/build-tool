@@ -41,7 +41,7 @@ import org.json.JSONObject
  * 每次打开工具面板都会向服务端复核会话；登录时上报 IP 与设备码。
  */
 object OnyxAuth {
-    private const val API = "https://pw.5w.pw/onyx/api.php"
+    private const val API = "https://pw.5w.pw/onyx_build/api.php"
     // 与 server/api.php 的 $SIGN_SECRET 一致
     private const val SIGN_SECRET = "OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH'!-Ipo-OnYx_Build_J-Top£"
     private const val PREFS = "onyx_auth"
@@ -177,7 +177,7 @@ object OnyxAuth {
         ).apply { topMargin = dp(16f) })
 
         root.addView(TextView(activity).apply {
-            text = "登录即表示同意将当前 IP 与登录时间记录用于安全审计"
+            text = "欲买桂花同载酒，终不似，少年游。"
             textSize = 9.5f
             gravity = Gravity.CENTER
             setTextColor(Color.parseColor(MUTED))

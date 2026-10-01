@@ -1,7 +1,7 @@
 <?php
 /**
  * Onyx_build 管理后台。
- * 登录凭证 = config.php 里的 ONYX_ADMIN_KEY（账号任意/留空也行，密码即密钥），
+ * 登录凭证 = config.php 里的 ONYX_ADMIN_USER / ONYX_ADMIN_PASS。
  * 只存在服务器配置中，不进数据库。
  */
 session_start();
@@ -50,20 +50,23 @@ function page_foot(): void { echo '</div></body></html>'; }
 if (!isset($_SESSION['onyx_admin'])) {
     $err = '';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (hash_equals(ONYX_ADMIN_KEY, (string)($_POST['key'] ?? ''))) {
+        $inputUser = (string)($_POST['user'] ?? '');
+        $inputPass = (string)($_POST['pass'] ?? '');
+        if (hash_equals(ONYX_ADMIN_USER, $inputUser) && hash_equals(ONYX_ADMIN_PASS, $inputPass)) {
             session_regenerate_id(true);
             $_SESSION['onyx_admin'] = true;
             header('Location: admin.php');
             exit;
         }
-        $err = '密钥错误';
+        $err = '账号或密码错误';
     }
     page_head('Onyx_build · 后台登录');
     echo '<div class="card" style="max-width:420px;margin:8vh auto;"><div class="brand">ONYX_BUILD</div>
-        <h1>管理后台</h1><div class="sub">输入管理密钥登录</div>';
+        <h1>管理后台</h1><div class="sub">请输入账号和密码登录</div>';
     if ($err) echo '<div class="msg err">' . htmlspecialchars($err) . '</div>';
-    echo '<form method="post"><label>管理密钥（ADMIN_KEY）</label>
-        <input type="password" name="key" required autofocus>
+    echo '<form method="post">
+        <label>账号</label><input type="text" name="user" required autofocus>
+        <label>密码</label><input type="password" name="pass" required>
         <div style="margin-top:16px"><button>登 录</button></div></form></div>';
     page_foot();
     exit;

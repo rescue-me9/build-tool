@@ -179,48 +179,7 @@ private fun OnyxWelcome() {
                     }
                 }
                 Spacer(Modifier.height(20.dp))
-
-                // 功能速览
-                FeatureRow("01", "建筑导入", "导入建筑模型与图片画，支持断点恢复与校验修复")
-                Spacer(Modifier.height(9.dp))
-                FeatureRow("02", "建筑投影", "预览结构与材料清单，按需开启投影打印机")
-                Spacer(Modifier.height(9.dp))
-                FeatureRow("03", "建筑导出", "选取角点保存建筑，支持分区扫描与进度跟踪")
             }
-        }
-    }
-}
-
-@Composable
-private fun FeatureRow(index: String, title: String, description: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF6F9FE), RoundedCornerShape(14.dp))
-            .border(1.dp, Color(0xFFD8E2F0), RoundedCornerShape(14.dp))
-            .padding(15.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Text(
-            text = index,
-            color = Color(0xFF2E6FD8),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(top = 2.dp, end = 14.dp)
-        )
-        Column {
-            Text(
-                text = title,
-                color = Color(0xFF1B2735),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = description,
-                color = Color(0xFF6B7A90),
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 }
