@@ -34,16 +34,16 @@ object BuildToolsWatermark {
         val preferences = activity.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val watermark = TextView(activity).apply {
             tag = VIEW_TAG
-            text = "建筑工具  ·  打开"
+            text = "Onyx_build  ·  打开"
             gravity = Gravity.CENTER
-            setTextColor(Color.rgb(170, 78, 49))
+            setTextColor(Color.rgb(46, 111, 216))
             textSize = 11f
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             setPadding(dp(12), dp(7), dp(12), dp(7))
             background = GradientDrawable().apply {
-                setColor(Color.argb(239, 255, 254, 250))
+                setColor(Color.argb(239, 246, 249, 254))
                 cornerRadius = dp(9).toFloat()
-                setStroke(dp(1), Color.rgb(231, 224, 215))
+                setStroke(dp(1), Color.rgb(216, 226, 240))
             }
             setOnClickListener { BuildToolsLauncher.openPanel(activity) }
         }

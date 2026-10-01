@@ -18,19 +18,19 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFCF6846),
+    primary = Color(0xFF2E6FD8),
     onPrimary = Color.White,
     secondary = Color(0xFF3F765C),
     onSecondary = Color.White,
-    tertiary = Color(0xFFAA4E31),
-    background = Color(0xFFF7F5F0),
-    onBackground = Color(0xFF302D29),
-    surface = Color(0xFFFFFEFA),
-    onSurface = Color(0xFF302D29)
+    tertiary = Color(0xFF1F4FA8),
+    background = Color(0xFFF3F7FD),
+    onBackground = Color(0xFF1B2735),
+    surface = Color(0xFFF6F9FE),
+    onSurface = Color(0xFF1B2735)
 )
 
 @Composable
-fun 无尽纹理BUILDTOOLTheme(
+fun OnyxBuildTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

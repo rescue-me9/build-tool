@@ -87,35 +87,35 @@ object BuildExportProgressOverlay {
             orientation = LinearLayout.VERTICAL
             isClickable = true
             setPadding(dp(14f), dp(12f), dp(14f), dp(12f))
-            background = rounded("#F7FFFEFA", dp(14f), "#FFE7E0D7")
+            background = rounded("#F7FFFEFA", dp(14f), "#FFD8E2F0")
         }
         val title = TextView(activity).apply {
             text = "BUILD EXPORT"
             textSize = 10f
             typeface = Typeface.DEFAULT_BOLD
             letterSpacing = 0f
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
         }
         val state = TextView(activity).apply {
             textSize = 15f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FF302D29"))
+            setTextColor(Color.parseColor("#FF1B2735"))
             setPadding(0, dp(4f), 0, 0)
         }
         val progress = ProgressBar(activity, null, progressBarStyleHorizontal).apply {
             max = 1000
-            progressTintList = ColorStateList.valueOf(Color.parseColor("#FFCF6846"))
-            progressBackgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFE7E0D7"))
+            progressTintList = ColorStateList.valueOf(Color.parseColor("#FF2E6FD8"))
+            progressBackgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFD8E2F0"))
         }
         val count = TextView(activity).apply {
             textSize = 11f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(0, dp(6f), 0, 0)
         }
         val regionProgress = TextView(activity).apply {
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
             setPadding(0, dp(5f), 0, 0)
             visibility = View.GONE
         }
@@ -129,7 +129,7 @@ object BuildExportProgressOverlay {
         }
         val detail = TextView(activity).apply {
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(0, dp(5f), 0, 0)
             maxLines = 2
         }
@@ -145,10 +145,10 @@ object BuildExportProgressOverlay {
             setPadding(dp(4f), 0, dp(4f), 0)
             setTextColor(
                 if (accent) Color.WHITE
-                else Color.parseColor("#FF302D29")
+                else Color.parseColor("#FF1B2735")
             )
             background = rounded(
-                if (accent) "#FFCF6846" else "#FFFFFEFA",
+                if (accent) "#FF2E6FD8" else "#FFF6F9FE",
                 dp(9f),
                 if (accent) null else "#FFDED7CE"
             )

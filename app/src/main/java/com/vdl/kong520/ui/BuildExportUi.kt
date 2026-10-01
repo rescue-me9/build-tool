@@ -145,7 +145,7 @@ object BuildExportUi {
                 dp(if (compact) 16f else 22f),
                 dp(if (compact) 12f else 20f)
             )
-            background = rounded("#FFFFFEFA", dp(20f), "#FFE7E0D7")
+            background = rounded("#FFF6F9FE", dp(20f), "#FFD8E2F0")
         }
 
         val header = LinearLayout(activity).apply { gravity = Gravity.CENTER_VERTICAL }
@@ -155,32 +155,32 @@ object BuildExportUi {
             textSize = 10f
             typeface = Typeface.DEFAULT_BOLD
             letterSpacing = 0.1f
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
         })
         titleColumn.addView(TextView(activity).apply {
             text = "建筑导出"
             textSize = 22f
             typeface = Typeface.create("serif", Typeface.BOLD)
-            setTextColor(Color.parseColor("#FF302D29"))
+            setTextColor(Color.parseColor("#FF1B2735"))
         })
         titleColumn.addView(TextView(activity).apply {
             text = "选取两个角点，自动保存为 .infinity"
             textSize = 11f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
         })
         val close = TextView(activity).apply {
             text = "×"
             textSize = 24f
             gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#FF77716A"))
-            background = rounded("#FFFAF7F1", dp(10f), "#FFE7E0D7")
+            setTextColor(Color.parseColor("#FF6B7A90"))
+            background = rounded("#FFEDF3FC", dp(10f), "#FFD8E2F0")
             setOnClickListener { dialog.dismiss() }
         }
         header.addView(titleColumn, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         header.addView(close, LinearLayout.LayoutParams(dp(40f), dp(40f)))
         root.addView(header)
         root.addView(View(activity).apply {
-            setBackgroundColor(Color.parseColor("#FFE7E0D7"))
+            setBackgroundColor(Color.parseColor("#FFD8E2F0"))
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1f)).apply {
             topMargin = dp(if (compact) 9f else 13f)
         })
@@ -195,7 +195,7 @@ object BuildExportUi {
         val side = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14f), dp(12f), dp(14f), dp(12f))
-            background = rounded("#FFFAF7F1", dp(14f), "#FFE7E0D7")
+            background = rounded("#FFEDF3FC", dp(14f), "#FFD8E2F0")
         }
         val sideScroll = ScrollView(activity).apply {
             isVerticalScrollBarEnabled = false
@@ -242,7 +242,7 @@ object BuildExportUi {
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
             letterSpacing = 0.06f
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
             setPadding(0, dp(10f), 0, dp(6f))
             form.addView(this)
         }
@@ -250,8 +250,8 @@ object BuildExportUi {
         fun input(text: String, numeric: Boolean): EditText = EditText(activity).apply {
             setText(text)
             textSize = 14f
-            setTextColor(Color.parseColor("#FF302D29"))
-            setHintTextColor(Color.parseColor("#FFAAA39A"))
+            setTextColor(Color.parseColor("#FF1B2735"))
+            setHintTextColor(Color.parseColor("#FF93A3BA"))
             isSingleLine = true
             inputType = if (numeric) {
                 InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
@@ -271,9 +271,9 @@ object BuildExportUi {
             minWidth = 0
             minimumWidth = 0
             setPadding(dp(7f), 0, dp(7f), 0)
-            setTextColor(if (accent) Color.WHITE else Color.parseColor("#FF302D29"))
+            setTextColor(if (accent) Color.WHITE else Color.parseColor("#FF1B2735"))
             background = rounded(
-                if (accent) "#FFCF6846" else "#FFFFFEFA",
+                if (accent) "#FF2E6FD8" else "#FFF6F9FE",
                 dp(9f),
                 if (accent) null else "#FFDED7CE"
             )
@@ -297,18 +297,18 @@ object BuildExportUi {
             val body = LinearLayout(activity).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(22f), dp(20f), dp(22f), dp(16f))
-                background = rounded("#FFFFFEFA", dp(20f), "#FFE7E0D7")
+                background = rounded("#FFF6F9FE", dp(20f), "#FFD8E2F0")
             }
             body.addView(TextView(activity).apply {
                 text = title
                 textSize = 17f
                 typeface = Typeface.DEFAULT_BOLD
-                setTextColor(Color.parseColor("#FF302D29"))
+                setTextColor(Color.parseColor("#FF1B2735"))
             })
             body.addView(TextView(activity).apply {
                 text = message
                 textSize = 12.5f
-                setTextColor(Color.parseColor("#FF77716A"))
+                setTextColor(Color.parseColor("#FF6B7A90"))
                 setPadding(0, dp(10f), 0, dp(18f))
             })
             val row = LinearLayout(activity).apply { gravity = Gravity.END }
@@ -353,14 +353,14 @@ object BuildExportUi {
         val outputHint = TextView(activity).apply {
             text = outputDirectory?.absolutePath ?: "外部文件目录不可用"
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), dp(5f), dp(4f), 0)
         }
         form.addView(outputHint)
         form.addView(TextView(activity).apply {
             text = "所有方块状态和方块实体统一保存为 .infinity"
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), dp(3f), dp(4f), 0)
         })
 
@@ -368,7 +368,7 @@ object BuildExportUi {
         form.addView(TextView(activity).apply {
             text = "模拟区块范围（每边原版区块数，$MIN_SIMULATION_CHUNK_RANGE - $MAX_SIMULATION_CHUNK_RANGE）"
             textSize = 11f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), 0, dp(4f), dp(5f))
         })
         val simulationChunkRange = input(
@@ -385,7 +385,7 @@ object BuildExportUi {
         form.addView(TextView(activity).apply {
             text = "4 表示单次扫描 4×4 区块；8 表示 8×8 区块。"
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), dp(4f), dp(4f), 0)
         })
 
@@ -444,12 +444,12 @@ object BuildExportUi {
             text = "05 · 导出状态"
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
         })
         val stateView = TextView(activity).apply {
             textSize = 17f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FF302D29"))
+            setTextColor(Color.parseColor("#FF1B2735"))
             setPadding(0, dp(6f), 0, dp(4f))
         }
         sideContent.addView(stateView)
@@ -458,7 +458,7 @@ object BuildExportUi {
             text = "06 · 传送方式"
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
             setPadding(0, dp(5f), 0, 0)
         })
         fun teleportOption(label: String) = RadioButton(activity).apply {
@@ -468,8 +468,8 @@ object BuildExportUi {
             maxLines = 1
             minWidth = 0
             minimumWidth = 0
-            setTextColor(Color.parseColor("#FF302D29"))
-            buttonTintList = ColorStateList.valueOf(Color.parseColor("#FFCF6846"))
+            setTextColor(Color.parseColor("#FF1B2735"))
+            buttonTintList = ColorStateList.valueOf(Color.parseColor("#FF2E6FD8"))
             setPadding(0, 0, dp(3f), 0)
             id = View.generateViewId()
         }
@@ -498,7 +498,7 @@ object BuildExportUi {
         val teleportModeHint = TextView(activity).apply {
             text = "自动前往每个分区；TP 验证失败时会切换为不传送。"
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), 0, dp(4f), dp(5f))
         }
         sideContent.addView(teleportModeHint)
@@ -516,15 +516,15 @@ object BuildExportUi {
             text = "07 · 容器物品"
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#FFAA4E31"))
+            setTextColor(Color.parseColor("#FF1F4FA8"))
             setPadding(0, dp(5f), 0, 0)
         })
         val exportContainerItems = CheckBox(activity).apply {
             text = "导出容器内物品"
             textSize = 11f
             isChecked = prefs.getBoolean(KEY_EXPORT_CONTAINER_ITEMS, true)
-            setTextColor(Color.parseColor("#FF302D29"))
-            buttonTintList = ColorStateList.valueOf(Color.parseColor("#FFCF6846"))
+            setTextColor(Color.parseColor("#FF1B2735"))
+            buttonTintList = ColorStateList.valueOf(Color.parseColor("#FF2E6FD8"))
             setPadding(0, 0, dp(3f), 0)
         }
         sideContent.addView(exportContainerItems, LinearLayout.LayoutParams(
@@ -534,34 +534,34 @@ object BuildExportUi {
         sideContent.addView(TextView(activity).apply {
             text = "关闭后只导出容器方块，不读取其中的物品；可明显缩短导出时间。"
             textSize = 10f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(dp(4f), 0, dp(4f), dp(5f))
         })
         val progress = ProgressBar(activity, null, progressBarStyleHorizontal).apply {
             max = 1000
-            progressTintList = ColorStateList.valueOf(Color.parseColor("#FFCF6846"))
-            progressBackgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFE7E0D7"))
+            progressTintList = ColorStateList.valueOf(Color.parseColor("#FF2E6FD8"))
+            progressBackgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFD8E2F0"))
         }
         sideContent.addView(progress, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(8f)).apply {
             topMargin = dp(4f)
         })
         val count = TextView(activity).apply {
             textSize = 12f
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(0, dp(8f), 0, dp(4f))
         }
         sideContent.addView(count)
         val status = TextView(activity).apply {
             textSize = 11f
-            setTextColor(Color.parseColor("#FF302D29"))
+            setTextColor(Color.parseColor("#FF1B2735"))
             setPadding(dp(10f), dp(9f), dp(10f), dp(9f))
-            background = rounded("#FFFFFFFF", dp(9f), "#FFE7E0D7")
+            background = rounded("#FFFFFFFF", dp(9f), "#FFD8E2F0")
         }
         sideContent.addView(status, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
         val navigation = TextView(activity).apply {
             textSize = 12f
-            setTextColor(Color.parseColor("#FF302D29"))
+            setTextColor(Color.parseColor("#FF1B2735"))
             setPadding(dp(10f), dp(9f), dp(10f), dp(9f))
             background = rounded("#FFF9EFDC", dp(9f), "#FFEED9B2")
             visibility = View.GONE
@@ -605,7 +605,7 @@ object BuildExportUi {
             text = "关闭面板不会中断后台导出"
             textSize = 10f
             gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#FF77716A"))
+            setTextColor(Color.parseColor("#FF6B7A90"))
             setPadding(0, dp(7f), 0, 0)
         })
 

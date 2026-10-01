@@ -241,7 +241,7 @@ class BuildToolsHookInit : IXposedHookLoadPackage {
                 // The complete-material window is a separate compact panel.
                 // It has its own lifecycle and never replaces the printer UI.
                 BuildProjectionMaterialPreviewOverlay.attachToHostIfNeeded(activity)
-                bridgeLog("BUILD TOOLS watermark attached")
+                bridgeLog("Onyx_build watermark attached")
             }
         }
     }

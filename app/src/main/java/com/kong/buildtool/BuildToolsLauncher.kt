@@ -14,11 +14,13 @@ object BuildToolsLauncher {
     enum class Tool { IMPORT, PIXEL_ART, PROJECTION, EXPORT }
 
     fun openPanel(activity: Activity) {
-        openWhenReady(activity) { BuildToolsPanelPopup.show(activity) }
+        openWhenReady(activity) { OnyxAuth.ensureAuthenticated(activity) { BuildToolsPanelPopup.show(activity) } }
     }
 
     fun open(activity: Activity, tool: Tool) {
-        openWhenReady(activity) { showTool(activity, tool) }
+        openWhenReady(activity) {
+            OnyxAuth.ensureAuthenticated(activity) { showTool(activity, tool) }
+        }
     }
 
     private fun openWhenReady(activity: Activity, show: () -> Unit) {
@@ -30,7 +32,7 @@ object BuildToolsLauncher {
                 if (activity.isFinishing || activity.isDestroyed) return@runOnUiThread
                 if (ready) show() else Toast.makeText(
                     activity.applicationContext,
-                    "建筑工具原生运行库未能加载",
+                    "Onyx_build 原生运行库未能加载",
                     Toast.LENGTH_LONG
                 ).show()
             }

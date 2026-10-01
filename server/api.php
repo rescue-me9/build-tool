@@ -1,0 +1,217 @@
+<?php
+/**
+ * Onyx_build 授权后端。部署到 https://pw.5w.pw/onyx/api.php
+ * 数据库表前缀: Onyx_
+ */
+
+// ==== 部署时必须修改 ====
+$DB_HOST = 'localhost';
+$DB_NAME = 'onyx';
+$DB_USER = 'onyx';
+$DB_PASS = 'CHANGE_ME';
+// 管理接口密钥（客户端不可见，仅管理员工具使用）
+$ADMIN_KEY = 'CHANGE_ME_ADMIN_KEY';
+// 请求签名盐：与客户端 OnyxAuth.kt 中的 SECRET 一致，用于提高伪造请求门槛
+$SIGN_SECRET = 'CHANGE_ME_SIGN_SECRET';
+// 会话有效期（秒）
+$SESSION_TTL = 86400 * 7;
+
+header('Content-Type: application/json; charset=utf-8');
+
+function out($ok, $code, $msg, $extra = []) {
+    echo json_encode(array_merge(['ok' => $ok, 'code' => $code, 'msg' => $msg], $extra), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function client_ip() {
+    return $_SERVER['HTTP_CF_CONNECTING_IP']
+        ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+function body() {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    if (!is_array($data)) out(false, 'bad_request', '请求格式错误');
+    return $data;
+}
+
+// 客户端请求签名: sha256(username + device_id + timestamp + SECRET)
+// 时间戳偏差超过 10 分钟拒绝，防重放
+function check_signature($data, $secret) {
+    foreach (['username', 'device_id', 'timestamp', 'sign'] as $k) {
+        if (!isset($data[$k]) || !is_string($data[$k]) || $data[$k] === '') {
+            out(false, 'bad_request', '参数缺失');
+        }
+    }
+    if (abs(time() - (int)$data['timestamp']) > 600) {
+        out(false, 'bad_request', '请求已过期，请校准设备时间');
+    }
+    $expect = hash('sha256', $data['username'] . $data['device_id'] . $data['timestamp'] . $secret);
+    if (!hash_equals($expect, $data['sign'])) {
+        out(false, 'bad_sign', '签名校验失败');
+    }
+}
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$action = $_GET['action'] ?? '';
+
+if ($method !== 'POST') out(false, 'bad_method', '仅支持 POST');
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+try {
+    $db = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
+    $db->set_charset('utf8mb4');
+} catch (Throwable $e) {
+    out(false, 'db_error', '服务暂时不可用');
+}
+
+function log_login(mysqli $db, int $uid, string $username, string $ip, string $device, string $result): void {
+    $stmt = $db->prepare('INSERT INTO Onyx_login_logs (user_id, username, ip, device_id, result) VALUES (?,?,?,?,?)');
+    $stmt->bind_param('issss', $uid, $username, $ip, $device, $result);
+    $stmt->execute();
+}
+
+switch ($action) {
+    // ================= 登录 =================
+    case 'login': {
+        $data = body();
+        check_signature($data, $SIGN_SECRET);
+        $username = $data['username'];
+        $device = $data['device_id'];
+        if (!isset($data['password']) || $data['password'] === '') out(false, 'bad_request', '参数缺失');
+        $password = $data['password'];
+
+        $stmt = $db->prepare('SELECT id, password_hash, status, banned_reason, bound_device FROM Onyx_users WHERE username = ? LIMIT 1');
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            log_login($db, $user['id'] ?? 0, $username, client_ip(), $device, 'bad_credentials');
+            out(false, 'bad_credentials', '账号或密码错误');
+        }
+        if ((int)$user['status'] === 0) {
+            log_login($db, (int)$user['id'], $username, client_ip(), $device, 'banned');
+            out(false, 'banned', '当前您已被封禁，请联系管理员解封');
+        }
+        if ($user['bound_device'] !== null && $user['bound_device'] !== $device) {
+            log_login($db, (int)$user['id'], $username, client_ip(), $device, 'device_mismatch');
+            out(false, 'device_mismatch', '设备码错误：该账号已绑定其他设备');
+        }
+        if ($user['bound_device'] === null) {
+            $stmt = $db->prepare('UPDATE Onyx_users SET bound_device = ? WHERE id = ?');
+            $stmt->bind_param('si', $device, $user['id']);
+            $stmt->execute();
+        }
+
+        // 换发新会话并清理旧会话
+        $stmt = $db->prepare('DELETE FROM Onyx_sessions WHERE user_id = ?');
+        $stmt->bind_param('i', $user['id']);
+        $stmt->execute();
+
+        $token = bin2hex(random_bytes(32));
+        $stmt = $db->prepare('INSERT INTO Onyx_sessions (user_id, token, device_id, expires_at) VALUES (?,?,?, DATE_ADD(NOW(), INTERVAL ? SECOND))');
+        $stmt->bind_param('issi', $user['id'], $token, $device, $SESSION_TTL);
+        $stmt->execute();
+
+        log_login($db, (int)$user['id'], $username, client_ip(), $device, 'success');
+        out(true, 'ok', '登录成功', ['token' => $token]);
+    }
+
+    // ================= 会话校验（每次打开面板调用）=================
+    case 'verify': {
+        $data = body();
+        foreach (['token', 'device_id'] as $k) {
+            if (!isset($data[$k]) || !is_string($data[$k]) || $data[$k] === '') out(false, 'bad_request', '参数缺失');
+        }
+        $stmt = $db->prepare(
+            'SELECT s.id, u.id AS uid, u.username, u.status, u.banned_reason, s.device_id
+             FROM Onyx_sessions s JOIN Onyx_users u ON u.id = s.user_id
+             WHERE s.token = ? AND s.expires_at > NOW() LIMIT 1'
+        );
+        $stmt->bind_param('s', $data['token']);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) out(false, 'expired', '登录已过期，请重新登录');
+        if ((int)$row['status'] === 0) {
+            $stmt = $db->prepare('DELETE FROM Onyx_sessions WHERE user_id = ?');
+            $stmt->bind_param('i', $row['uid']);
+            $stmt->execute();
+            out(false, 'banned', '当前您已被封禁，请联系管理员解封');
+        }
+        if ($row['device_id'] !== $data['device_id']) out(false, 'device_mismatch', '设备码错误：请在本绑定设备上使用');
+        out(true, 'ok', '已登录', ['username' => $row['username']]);
+    }
+
+    // ================= 登出 =================
+    case 'logout': {
+        $data = body();
+        if (!isset($data['token'])) out(false, 'bad_request', '参数缺失');
+        $stmt = $db->prepare('DELETE FROM Onyx_sessions WHERE token = ?');
+        $stmt->bind_param('s', $data['token']);
+        $stmt->execute();
+        out(true, 'ok', '已退出');
+    }
+
+    // ================= 管理：建号 =================
+    case 'admin_create': {
+        $data = body();
+        if (($data['admin_key'] ?? '') !== $ADMIN_KEY) out(false, 'forbidden', '禁止访问');
+        foreach (['username', 'password'] as $k) {
+            if (!isset($data[$k]) || !is_string($data[$k]) || $data[$k] === '') out(false, 'bad_request', '参数缺失');
+        }
+        if (!preg_match('/^[A-Za-z0-9_]{3,32}$/', $data['username'])) out(false, 'bad_request', '用户名仅限 3-32 位字母数字下划线');
+        $hash = password_hash($data['password'], PASSWORD_DEFAULT);
+        $stmt = $db->prepare('INSERT INTO Onyx_users (username, password_hash) VALUES (?, ?)');
+        try {
+            $stmt->bind_param('ss', $data['username'], $hash);
+            $stmt->execute();
+        } catch (Throwable $e) {
+            out(false, 'duplicate', '用户名已存在');
+        }
+        out(true, 'ok', '创建成功');
+    }
+
+    // ================= 管理：封禁/解封 =================
+    case 'admin_ban': {
+        $data = body();
+        if (($data['admin_key'] ?? '') !== $ADMIN_KEY) out(false, 'forbidden', '禁止访问');
+        if (!isset($data['username'])) out(false, 'bad_request', '参数缺失');
+        $ban = !empty($data['ban']);
+        $reason = $ban ? (string)($data['reason'] ?? '违规使用') : null;
+        $stmt = $db->prepare('UPDATE Onyx_users SET status = ?, banned_reason = ? WHERE username = ?');
+        $status = $ban ? 0 : 1;
+        $stmt->bind_param('iss', $status, $reason, $data['username']);
+        $stmt->execute();
+        if ($ban) {
+            $stmt = $db->prepare('DELETE FROM Onyx_sessions WHERE user_id = (SELECT id FROM Onyx_users WHERE username = ?)');
+            $stmt->bind_param('s', $data['username']);
+            $stmt->execute();
+        }
+        out(true, 'ok', $ban ? '已封禁' : '已解封');
+    }
+
+    // ================= 管理：解绑设备 =================
+    case 'admin_unbind': {
+        $data = body();
+        if (($data['admin_key'] ?? '') !== $ADMIN_KEY) out(false, 'forbidden', '禁止访问');
+        if (!isset($data['username'])) out(false, 'bad_request', '参数缺失');
+        $stmt = $db->prepare('UPDATE Onyx_users SET bound_device = NULL WHERE username = ?');
+        $stmt->bind_param('s', $data['username']);
+        $stmt->execute();
+        out(true, 'ok', '已解绑设备');
+    }
+
+    // ================= 管理：查询登录记录 =================
+    case 'admin_logs': {
+        $data = body();
+        if (($data['admin_key'] ?? '') !== $ADMIN_KEY) out(false, 'forbidden', '禁止访问');
+        $limit = min((int)($data['limit'] ?? 50), 200);
+        $res = $db->query("SELECT username, ip, device_id, result, login_time FROM Onyx_login_logs ORDER BY id DESC LIMIT $limit");
+        $rows = $res->fetch_all(MYSQLI_ASSOC);
+        out(true, 'ok', 'ok', ['logs' => $rows]);
+    }
+
+    default:
+        out(false, 'unknown_action', '未知操作');
+}

@@ -72,26 +72,26 @@ object BuildImportProgressOverlay {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(13f), dp(11f), dp(13f), dp(11f))
-            background = rounded("#F5FFFEFA", dp(13f), "#E7E0D7")
+            background = rounded("#F5FFFEFA", dp(13f), "#D8E2F0")
         }
         val title = TextView(activity).apply {
             text = if (eyebrow.contains("IMAGE", ignoreCase = true)) "图片导入进度" else "建筑导入进度"
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
             letterSpacing = 0.02f
-            setTextColor(Color.parseColor("#AA4E31"))
+            setTextColor(Color.parseColor("#1F4FA8"))
         }
         val state = TextView(activity).apply {
             textSize = 12f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#302D29"))
+            setTextColor(Color.parseColor("#1B2735"))
             setPadding(0, dp(5f), 0, 0)
         }
         val elapsed = TextView(activity).apply {
             textSize = 10f
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
-            setTextColor(Color.parseColor("#AA4E31"))
+            setTextColor(Color.parseColor("#1F4FA8"))
             setPadding(dp(8f), dp(5f), 0, 0)
             visibility = TextView.GONE
         }
@@ -103,17 +103,17 @@ object BuildImportProgressOverlay {
         stateRow.addView(elapsed, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         val progress = ProgressBar(activity, null, progressBarStyleHorizontal).apply {
             max = 100
-            progressTintList = ColorStateList.valueOf(Color.parseColor("#CF6846"))
+            progressTintList = ColorStateList.valueOf(Color.parseColor("#2E6FD8"))
             progressBackgroundTintList = ColorStateList.valueOf(Color.parseColor("#EDE8E0"))
         }
         val count = TextView(activity).apply {
             textSize = 10f
-            setTextColor(Color.parseColor("#77716A"))
+            setTextColor(Color.parseColor("#6B7A90"))
             setPadding(0, dp(8f), 0, 0)
         }
         val detail = TextView(activity).apply {
             textSize = 10f
-            setTextColor(Color.parseColor("#77716A"))
+            setTextColor(Color.parseColor("#6B7A90"))
             setPadding(0, dp(3f), 0, 0)
         }
         root.addView(title)

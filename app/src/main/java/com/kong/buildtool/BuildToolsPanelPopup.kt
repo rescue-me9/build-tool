@@ -25,13 +25,13 @@ import android.widget.TextView
 
 /** Warm, compact, resource-free panel shown inside the hooked game process. */
 object BuildToolsPanelPopup {
-    private const val PAPER = "#FFFEFA"
-    private const val CREAM = "#FAF7F1"
-    private const val INK = "#302D29"
-    private const val MUTED = "#77716A"
-    private const val LINE = "#E7E0D7"
-    private const val ACCENT_DARK = "#AA4E31"
-    private const val GREEN = "#3F765C"
+    private const val PAPER = "#F6F9FE"
+    private const val CREAM = "#EDF3FC"
+    private const val INK = "#1B2735"
+    private const val MUTED = "#6B7A90"
+    private const val LINE = "#D8E2F0"
+    private const val ACCENT_DARK = "#1F4FA8"
+    private const val GREEN = "#2F7D5B"
 
     private var activeDialog: Dialog? = null
 
@@ -70,16 +70,16 @@ object BuildToolsPanelPopup {
         }
         val headerText = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
         headerText.addView(TextView(activity).apply {
-            text = "BUILD TOOLS"
+            text = "ONYX_BUILD"
             textSize = if (veryShort) 8f else 9f
             letterSpacing = .14f
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextColor(Color.parseColor(ACCENT_DARK))
+            setTextColor(Color.parseColor("#2E6FD8"))
         })
         headerText.addView(TextView(activity).apply {
-            text = "建筑工具"
+            text = "Onyx_build"
             textSize = if (veryShort) 18f else if (short) 20f else 24f
-            typeface = Typeface.create("serif", Typeface.BOLD)
+            typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             setTextColor(Color.parseColor(INK))
         })
         header.addView(headerText, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
@@ -112,7 +112,7 @@ object BuildToolsPanelPopup {
                 ellipsize = TextUtils.TruncateAt.END
                 setTextColor(Color.parseColor(GREEN))
                 setPadding(dp(8f), dp(4f), dp(8f), dp(4f))
-                background = rounded("#E5F2E8", dp(15f), "#D5E8D8")
+                background = rounded("#E4F1EA", dp(15f), "#D2E7DB")
             }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             root.addView(summary, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
@@ -144,7 +144,7 @@ object BuildToolsPanelPopup {
 
         if (!short) {
             root.addView(TextView(activity).apply {
-                text = "建筑导入 · 图片导入 · 建筑导出 · 建筑投影"
+                text = "Onyx_build · 建筑导入 · 图片导入 · 建筑导出 · 建筑投影"
                 textSize = 10f
                 maxLines = 1
                 ellipsize = TextUtils.TruncateAt.END
@@ -200,7 +200,7 @@ object BuildToolsPanelPopup {
             setImageDrawable(BuildToolIconDrawable(tool, Color.parseColor(ACCENT_DARK)))
             scaleType = ImageView.ScaleType.CENTER_INSIDE
             setPadding(dp(7f), dp(7f), dp(7f), dp(7f))
-            background = rounded(CREAM, dp(10f), "#F0E9E0")
+            background = rounded(CREAM, dp(10f), "#E0EAF7")
         }, LinearLayout.LayoutParams(iconSize, iconSize).apply {
             if (stacked) bottomMargin = dp(3f) else marginEnd = dp(if (veryShort) 7f else 11f)
         })
