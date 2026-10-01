@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -25,25 +25,27 @@ jobs:
       - name: Enable Gradle wrapper to run
         run: chmod +x ./gradlew
 
-      - name: Set up Android SDK & NDK
-        uses: android-actions/setup-android@v3
+      - name: Locate Android SDK on runner
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/cmdline-tools" || true
+          ls "$ANDROID_HOME/build-tools" || true
+          ls "$ANDROID_HOME/platforms" || true
 
-      - name: Accept Android SDK licenses
+      - name: Install missing SDK packages (platform-37 + NDK)
         run: |
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager --install \
             "platforms;android-37" \
             "build-tools;36.0.0" \
             "ndk;26.1.10909125" \
-            "platform-tools"
+            "platform-tools" 2>&1 | tail -20
 
       - name: Write local.properties
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
-
-      - name: Make sure Gradle can resolve assets/build chain
-        run: cat local.properties
+          cat local.properties
 
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
