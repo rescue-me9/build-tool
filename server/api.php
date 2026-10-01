@@ -6,13 +6,13 @@
 
 // ==== 部署时必须修改 ====
 $DB_HOST = 'localhost';
-$DB_NAME = 'onyx';
-$DB_USER = 'onyx';
-$DB_PASS = 'CHANGE_ME';
+$DB_NAME = 'lvbkblij';
+$DB_USER = 'lvbkblij';
+$DB_PASS = 'aDaP24gG';
 // 管理接口密钥（客户端不可见，仅管理员工具使用）
 $ADMIN_KEY = 'CHANGE_ME_ADMIN_KEY';
 // 请求签名盐：与客户端 OnyxAuth.kt 中的 SECRET 一致，用于提高伪造请求门槛
-$SIGN_SECRET = 'CHANGE_ME_SIGN_SECRET';
+$SIGN_SECRET = 'OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH\'!-Ipo-OnYx_Build_J-Top£';
 // 会话有效期（秒）
 $SESSION_TTL = 86400 * 7;
 

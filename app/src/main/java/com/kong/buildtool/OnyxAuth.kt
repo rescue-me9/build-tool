@@ -43,7 +43,7 @@ import org.json.JSONObject
 object OnyxAuth {
     private const val API = "https://pw.5w.pw/onyx/api.php"
     // 与 server/api.php 的 $SIGN_SECRET 一致
-    private const val SIGN_SECRET = "CHANGE_ME_SIGN_SECRET"
+    private const val SIGN_SECRET = "OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH'!-Ipo-OnYx_Build_J-Top£"
     private const val PREFS = "onyx_auth"
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "username"
@@ -151,8 +151,8 @@ object OnyxAuth {
         }
         if (notice != null) notice(notice, true)
 
-        val userInput = field(activity, dp, "账号", false)
-        val passInput = field(activity, dp, "密码", true)
+        val userInput = field(activity, { v -> dp(v) }, "账号", false)
+        val passInput = field(activity, { v -> dp(v) }, "密码", true)
         root.addView(userInput.first, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(44f)
         ).apply { topMargin = dp(14f) })
