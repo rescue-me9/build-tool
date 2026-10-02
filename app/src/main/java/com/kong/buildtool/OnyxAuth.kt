@@ -81,14 +81,17 @@ object OnyxAuth {
     /** 面板入口：已登录且会话有效则直接放行，否则弹登录卡片。每次加载先过守卫并弹公告。 */
     fun ensureAuthenticated(activity: Activity, onPass: () -> Unit) {
         OnyxGuard.verifyAsync(activity.applicationContext) { notice ->
-            OnyxGuard.showNoticeCard(activity, notice) {
-                if (activity.isFinishing || activity.isDestroyed) return@showNoticeCard
-                continueAuthenticated(activity, onPass)
-            }
+            continueAuthenticated(activity, notice, onPass)
         }
     }
 
-    private fun continueAuthenticated(activity: Activity, onPass: () -> Unit) {
+    private fun showNotice(activity: Activity, notice: OnyxGuard.Notice, onPass: () -> Unit) {
+        OnyxGuard.showNoticeCard(activity, notice) {
+            if (!activity.isFinishing && !activity.isDestroyed) onPass()
+        }
+    }
+
+    private fun continueAuthenticated(activity: Activity, guardNotice: OnyxGuard.Notice, onPass: () -> Unit) {
         if (sessionValid) {
             onPass()
             return
@@ -105,19 +108,19 @@ object OnyxAuth {
                     if (activity.isFinishing || activity.isDestroyed) return@post
                     if (result.ok) {
                         sessionValid = true
-                        onPass()
+                        showNotice(activity, guardNotice, onPass)
                     } else {
                         prefs.edit().remove(KEY_TOKEN).apply()
-                        showLoginCard(activity, onPass, result.msg)
+                        showLoginCard(activity, onPass, guardNotice, result.msg)
                     }
                 }
             }, "onyx-verify").start()
         } else {
-            showLoginCard(activity, onPass, null)
+            showLoginCard(activity, onPass, guardNotice, null)
         }
     }
 
-    private fun showLoginCard(activity: Activity, onPass: () -> Unit, notice: String?) {
+    private fun showLoginCard(activity: Activity, onPass: () -> Unit, guardNotice: OnyxGuard.Notice, notice: String?) {
         if (activity.isFinishing || activity.isDestroyed) return
         val density = activity.resources.displayMetrics.density
         fun dp(v: Float) = (v * density + .5f).toInt()
@@ -252,7 +255,7 @@ object OnyxAuth {
                         sessionValid = true
                         dialog.dismiss()
                         Toast.makeText(context, "登录成功，欢迎回来 ${username}", Toast.LENGTH_SHORT).show()
-                        onPass()
+                        showNotice(activity, guardNotice, onPass)
                     } else {
                         loginButton.isEnabled = true
                         notice(result.msg.ifEmpty { "登录失败，请稍后重试" }, true)
