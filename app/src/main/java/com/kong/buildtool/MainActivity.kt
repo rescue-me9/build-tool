@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kong.buildtool.ui.theme.OnyxBuildTheme
 
-private const val DISCORD_URL = "https://discord.gg/Y93thMHNt2"
+private const val DISCORD_URL = "https://discord.gg/34cWFHTqkr"
 private const val QQ_GROUP = "1081622107"
 
 /** 模块未加载到游戏时的独立启动页。 */

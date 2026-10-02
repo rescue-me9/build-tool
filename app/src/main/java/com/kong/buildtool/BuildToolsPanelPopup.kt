@@ -96,7 +96,7 @@ object BuildToolsPanelPopup {
             ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f
         ).apply { topMargin = dp(12f) })
 
-        val navLabels = tools.map { it.label }
+        val navLabels = tools.map { it.label } + "我的信息"
         val navViews = mutableListOf<TextView>()
         // Bound lazily after the views they need are built.
         var refreshSelection: (Int) -> Unit = { }
@@ -184,32 +184,6 @@ object BuildToolsPanelPopup {
                 }
             }
         }
-        renderContent = {
-            val entry = tools[selectedIndex]
-            contentTitle.text = entry.label
-            contentSubtitle.text = entry.subtitle
-            detailCard.removeAllViews()
-            for (point in entry.points) {
-                val row = LinearLayout(activity).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL
-                }
-                row.addView(TextView(activity).apply {
-                    text = "●"
-                    textSize = 7f
-                    setTextColor(Color.parseColor(BLUE))
-                    setPadding(dp(2f), 0, dp(2f), 0)
-                })
-                row.addView(TextView(activity).apply {
-                    text = point
-                    textSize = 11f
-                    setTextColor(Color.parseColor("#344054"))
-                }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-                detailCard.addView(row, LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = dp(if (short) 3f else 7f) })
-            }
-        }
 
         val openButton = TextView(activity).apply {
             text = "打 开"
@@ -228,8 +202,64 @@ object BuildToolsPanelPopup {
             ViewGroup.LayoutParams.MATCH_PARENT, dp(46f)
         ).apply { topMargin = dp(12f) })
         openButton.setOnClickListener {
-            dialog.dismiss()
-            BuildToolsLauncher.open(activity, tools[selectedIndex].tool)
+            if (selectedIndex == tools.size) {
+                val next = !BuildToolsWatermark.isBigWatermarkEnabled(activity.applicationContext)
+                BuildToolsWatermark.setBigWatermark(activity, next)
+                renderContent()
+            } else {
+                dialog.dismiss()
+                BuildToolsLauncher.open(activity, tools[selectedIndex].tool)
+            }
+        }
+
+        renderContent = {
+            if (selectedIndex == tools.size) {
+                contentTitle.text = "我的信息"
+                contentSubtitle.text = "当前登录账号"
+                detailCard.removeAllViews()
+                val account = BuildToolsWatermark.currentAccount(activity.applicationContext)
+                detailCard.addView(TextView(activity).apply {
+                    text = "账号"
+                    textSize = 11f
+                    setTextColor(Color.parseColor(MUTED))
+                })
+                detailCard.addView(TextView(activity).apply {
+                    text = account
+                    textSize = 20f
+                    typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+                    setTextColor(Color.parseColor(INK))
+                }, LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(4f) })
+                val enabled = BuildToolsWatermark.isBigWatermarkEnabled(activity.applicationContext)
+                openButton.text = if (enabled) "关闭水印" else "开启水印"
+            } else {
+                val entry = tools[selectedIndex]
+                contentTitle.text = entry.label
+                contentSubtitle.text = entry.subtitle
+                detailCard.removeAllViews()
+                openButton.text = "打 开"
+                for (point in entry.points) {
+                    val row = LinearLayout(activity).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = Gravity.CENTER_VERTICAL
+                    }
+                    row.addView(TextView(activity).apply {
+                        text = "●"
+                        textSize = 7f
+                        setTextColor(Color.parseColor(BLUE))
+                        setPadding(dp(2f), 0, dp(2f), 0)
+                    })
+                    row.addView(TextView(activity).apply {
+                        text = point
+                        textSize = 11f
+                        setTextColor(Color.parseColor("#344054"))
+                    }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                    detailCard.addView(row, LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { bottomMargin = dp(if (short) 3f else 7f) })
+                }
+            }
         }
 
         val closeButton = TextView(activity).apply {

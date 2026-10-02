@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.util.Base64
 import android.view.Gravity
@@ -15,6 +16,7 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 
 /**
  * In-game floating switch. It carries the small app artwork inside a white
@@ -200,5 +202,60 @@ object BuildToolsWatermark {
                 moveTo(positionX, positionY, save = false)
             }
         }
+        if (isBigWatermarkEnabled(activity.applicationContext)) {
+            installBigWatermark(activity, currentAccount(activity.applicationContext))
+        }
+    }
+
+    private const val BIG_PREFS = "build_tools_watermark_state"
+    private const val KEY_BIG = "big_watermark_enabled"
+    private const val BIG_TAG = "build-tools-big-watermark"
+
+    fun maskAccount(raw: String): String {
+        if (raw.isEmpty()) return "未登录"
+        if (raw.length == 1) return raw
+        return raw.first() + "*****" + raw.last()
+    }
+
+    fun currentAccount(context: Context): String {
+        val raw = context.getSharedPreferences("onyx_auth", Context.MODE_PRIVATE)
+            .getString("username", "") ?: ""
+        return maskAccount(raw)
+    }
+
+    fun isBigWatermarkEnabled(context: Context): Boolean =
+        context.getSharedPreferences(BIG_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_BIG, false)
+
+    fun setBigWatermark(activity: Activity, enabled: Boolean) {
+        val context = activity.applicationContext
+        context.getSharedPreferences(BIG_PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_BIG, enabled).apply()
+        if (enabled) installBigWatermark(activity, currentAccount(context)) else removeBigWatermark(activity)
+    }
+
+    fun installBigWatermark(activity: Activity, account: String) {
+        val root = activity.window.decorView as? ViewGroup ?: return
+        if (root.findViewWithTag<TextView>(BIG_TAG) != null) return
+        val tv = TextView(activity).apply {
+            tag = BIG_TAG
+            text = "onyx_build用户\n$account"
+            textSize = 54f
+            gravity = Gravity.CENTER
+            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+            setTextColor(Color.argb(80, 0, 0, 0))
+            setLineSpacing(0f, 1f)
+            isClickable = false
+        }
+        root.addView(tv, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            Gravity.CENTER
+        ))
+    }
+
+    fun removeBigWatermark(activity: Activity) {
+        val root = activity.window.decorView as? ViewGroup ?: return
+        root.findViewWithTag<View>(BIG_TAG)?.let { root.removeView(it) }
     }
 }
