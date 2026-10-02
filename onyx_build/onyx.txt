@@ -1,6 +1,6 @@
 [onyx_build]
 version=1.0
-fingerprint=ba459cc64b5315f532feee3f6abbf524570d1738cc1833019de0f892cf0fa9d8
+fingerprint=bbaec37bb9d36aade48fc3470bda775bb96a8a72f972319f47d3acc4274fd8ad
 
 你们好
 我是贝利亚
