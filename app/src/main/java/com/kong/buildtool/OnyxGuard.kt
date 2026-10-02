@@ -44,7 +44,7 @@ object OnyxGuard {
     class Notice(
         val title: String,
         val version: String,
-        val fingerprint: String,
+        val fingerprints: List<String>,
         val lines: List<String>
     )
 
@@ -81,10 +81,10 @@ object OnyxGuard {
         if (notice.version.isEmpty() || notice.version != localVersion) {
             throw SecurityException("version mismatch: local=$localVersion remote=${notice.version}")
         }
-        // 签名指纹必须与服务器一致（防改包重打包）
+        // 签名指纹必须与服务器一致（防改包重打包）；服务器可配置多个合法指纹便于平滑换签。
         val localFingerprint = signingSha256(context)
-        if (localFingerprint.isEmpty() || notice.fingerprint.isEmpty() ||
-            notice.fingerprint != localFingerprint) {
+        if (localFingerprint.isEmpty() || notice.fingerprints.isEmpty() ||
+            localFingerprint !in notice.fingerprints) {
             throw SecurityException("signature mismatch")
         }
         return notice
@@ -112,7 +112,7 @@ object OnyxGuard {
 
         val rest = text.removePrefix("[$TAG_TITLE]").trimStart('\n', ' ')
         var version = ""
-        var fingerprint = ""
+        val fingerprints = mutableListOf<String>()
         val lines = mutableListOf<String>()
         for (line in rest.split("\n")) {
             val trim = line.trim()
@@ -120,15 +120,15 @@ object OnyxGuard {
             if (trim.startsWith("version=")) {
                 version = trim.substringAfter('=').trim()
             } else if (trim.startsWith("fingerprint=")) {
-                fingerprint = trim.substringAfter('=').trim()
+                fingerprints.add(trim.substringAfter('=').trim())
             } else {
                 lines.add(trim)
             }
         }
-        if (version.isEmpty() || fingerprint.isEmpty()) {
+        if (version.isEmpty() || fingerprints.isEmpty()) {
             throw SecurityException("missing guard fields")
         }
-        return Notice(TAG_TITLE, version, fingerprint, lines)
+        return Notice(TAG_TITLE, version, fingerprints, lines)
     }
 
     /** 模块自身 APK 的签名证书 SHA-256（小写 hex）。 */
