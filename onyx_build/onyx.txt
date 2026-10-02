@@ -1,6 +1,6 @@
 [onyx_build]
 version=1.0
-fingerprint=REPLACE_WITH_APK_SIGNATURE_SHA256
+fingerprint=ba459cc64b5315f532feee3f6abbf524570d1738cc1833019de0f892cf0fa9d8
 
 你们好
 我是贝利亚
