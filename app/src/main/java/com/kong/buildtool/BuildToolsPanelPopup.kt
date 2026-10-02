@@ -74,19 +74,10 @@ object BuildToolsPanelPopup {
             elevation = dp(12f).toFloat()
         }
 
-        // ---- 左侧深蓝导航栏 ----
+        // ---- 左侧白色导航栏 ----
         val side = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            background = GradientDrawable().apply {
-                colors = intArrayOf(Color.parseColor("#1E3A8A"), Color.parseColor("#2563EB"))
-                orientation = GradientDrawable.Orientation.TL_BR
-                cornerRadii = floatArrayOf(
-                    dp(22f).toFloat(), dp(22f).toFloat(),
-                    0f, 0f,
-                    0f, 0f,
-                    dp(22f).toFloat(), dp(22f).toFloat()
-                )
-            }
+            background = rounded("#FFFFFF", dp(22f), null)
             setPadding(dp(14f), dp(16f), dp(14f), dp(14f))
         }
         root.addView(side, LinearLayout.LayoutParams(dp(if (narrow) 96f else 118f), ViewGroup.LayoutParams.MATCH_PARENT))
@@ -96,7 +87,7 @@ object BuildToolsPanelPopup {
             textSize = 8.5f
             letterSpacing = .16f
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextColor(Color.parseColor("#93C5FD"))
+            setTextColor(Color.parseColor("#101828"))
             maxLines = 1
         })
 
@@ -120,7 +111,11 @@ object BuildToolsPanelPopup {
                 typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
                 setTextColor(Color.parseColor("#101828"))
                 setPadding(dp(10f), dp(10f), dp(10f), dp(10f))
-                background = rounded("#80FFFFFF", dp(12f), null)
+                background = GradientDrawable().apply {
+                    setColor(Color.parseColor("#FFFFFF"))
+                    cornerRadius = dp(12f).toFloat()
+                    setStroke(dp(1f), Color.parseColor("#E4E7EC"))
+                }
             }
             navList.addView(item, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
@@ -137,7 +132,7 @@ object BuildToolsPanelPopup {
             text = "By 萌面雕"
             textSize = 8.5f
             gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#93C5FD"))
+            setTextColor(Color.parseColor("#101828"))
         })
 
         // ---- 右侧白色内容区 ----
@@ -179,10 +174,14 @@ object BuildToolsPanelPopup {
                     "sans-serif-medium",
                     if (selected) Typeface.BOLD else Typeface.NORMAL
                 )
-                navViews[i].background = rounded(
-                    if (selected) "#FFFFFF" else "#80FFFFFF",
-                    dp(12f), null
-                )
+                navViews[i].background = GradientDrawable().apply {
+                    setColor(Color.parseColor("#FFFFFF"))
+                    cornerRadius = dp(12f).toFloat()
+                    setStroke(
+                        dp(if (selected) 2f else 1f),
+                        Color.parseColor(if (selected) "#2563EB" else "#E4E7EC")
+                    )
+                }
             }
         }
         renderContent = {
