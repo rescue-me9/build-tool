@@ -1,7 +1,4 @@
-[onyx_build]
-version=1.0
-fingerprint=bbaec37bb9d36aade48fc3470bda775bb96a8a72f972319f47d3acc4274fd8ad
-
+[onyx_build][onyx_1.0]
 你们好
 我是贝利亚
 欢迎使用 Onyx_build

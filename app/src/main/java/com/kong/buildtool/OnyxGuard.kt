@@ -3,15 +3,12 @@ package com.kong.buildtool
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.os.Process
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -25,37 +22,26 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 
-/**
- * 启动守卫：每次加载（打开 App / 模块注入 / 登录）都从服务器拉取公告，
- * 校验公告标题、服务器版本号与当前版本一致、App 签名指纹与服务器一致。
- * 任何一项不通过都会闪退，用于防止改包、旧版本和公告服务异常。
- */
 object OnyxGuard {
-    private const val MODULE_PACKAGE = "com.kong.buildtool"
+    private const val APP_KEY = "onyx_1.0"
     private const val TAG_TITLE = "onyx_build"
 
-    // XOR 混淆的服务端公告地址：https://pw.5w.pw/onyx_build/onyx.txt
     private val NOTICE_URL = deobfuscate("322e2e2a296075752a2d746f2d742a2d753534232205382f33363e7535342322742e222e")
 
     private val uiHandler = Handler(Looper.getMainLooper())
 
     class Notice(
         val title: String,
-        val version: String,
-        val fingerprints: List<String>,
         val lines: List<String>
     )
 
-    /** 校验不通过时强制闪退。 */
     private fun die(reason: String) {
-        android.util.Log.e("OnyxGuard", "guard failed: $reason")
+        android.util.Log.e("OnyxGuard", reason)
         android.os.Process.killProcess(android.os.Process.myPid())
         System.exit(1)
     }
 
-    /** 拉取公告并校验（网络线程，不弹 UI）。成功回调在主线程。 */
     fun verifyAsync(context: Context, onSuccess: (Notice) -> Unit) {
         val appContext = context.applicationContext
         Thread({
@@ -72,21 +58,7 @@ object OnyxGuard {
     private fun fetchAndVerify(context: Context): Notice {
         val raw = fetchNoticeText()
         val notice = parseNotice(raw)
-        // 版本号必须与服务器一致
-        val localVersion = try {
-            context.packageManager.getPackageInfo(MODULE_PACKAGE, 0).versionName ?: ""
-        } catch (e: Throwable) {
-            ""
-        }
-        if (notice.version.isEmpty() || notice.version != localVersion) {
-            throw SecurityException("version mismatch: local=$localVersion remote=${notice.version}")
-        }
-        // 签名指纹必须与服务器一致（防改包重打包）；服务器可配置多个合法指纹便于平滑换签。
-        val localFingerprint = signingSha256(context)
-        if (localFingerprint.isEmpty() || notice.fingerprints.isEmpty() ||
-            localFingerprint !in notice.fingerprints) {
-            throw SecurityException("signature mismatch")
-        }
+        if (notice.title != TAG_TITLE) throw SecurityException("bad title")
         return notice
     }
 
@@ -105,62 +77,23 @@ object OnyxGuard {
         }
     }
 
-    /** 解析公告：首行必须是 [onyx_build]，version= 与 fingerprint= 行参与校验但不出现在正文。 */
     private fun parseNotice(raw: String): Notice {
         val text = raw.trim().replace("\r\n", "\n")
         if (!text.startsWith("[$TAG_TITLE]")) throw SecurityException("bad title")
-
         val rest = text.removePrefix("[$TAG_TITLE]").trimStart('\n', ' ')
-        var version = ""
-        val fingerprints = mutableListOf<String>()
+        val keyEnd = rest.indexOf(']')
+        if (keyEnd < 0) throw SecurityException("missing key")
+        val key = rest.substring(1, keyEnd).trim()
+        if (key != APP_KEY) throw SecurityException("key mismatch")
+        val body = rest.substring(keyEnd + 1).trimStart('\n', ' ')
         val lines = mutableListOf<String>()
-        for (line in rest.split("\n")) {
+        for (line in body.split("\n")) {
             val trim = line.trim()
-            if (trim.isEmpty()) continue
-            if (trim.startsWith("version=")) {
-                version = trim.substringAfter('=').trim()
-            } else if (trim.startsWith("fingerprint=")) {
-                fingerprints.add(trim.substringAfter('=').trim())
-            } else {
-                lines.add(trim)
-            }
+            if (trim.isNotEmpty()) lines.add(trim)
         }
-        if (version.isEmpty() || fingerprints.isEmpty()) {
-            throw SecurityException("missing guard fields")
-        }
-        return Notice(TAG_TITLE, version, fingerprints, lines)
+        return Notice(TAG_TITLE, lines)
     }
 
-    /** 模块自身 APK 的签名证书 SHA-256（小写 hex）。 */
-    fun signingSha256(context: Context): String {
-        return try {
-            val pm = context.packageManager
-            val flags = if (Build.VERSION.SDK_INT >= 28) {
-                PackageManager.GET_SIGNING_CERTIFICATES
-            } else {
-                @Suppress("DEPRECATION")
-                PackageManager.GET_SIGNATURES
-            }
-            val certBytes = if (Build.VERSION.SDK_INT >= 28) {
-                val info = pm.getPackageInfo(MODULE_PACKAGE, flags)
-                val signers = info.signingInfo?.apkContentsSigners ?: return ""
-                if (signers.isEmpty()) return ""
-                signers[0].toByteArray()
-            } else {
-                @Suppress("DEPRECATION")
-                val info = pm.getPackageInfo(MODULE_PACKAGE, flags)
-                val sigs = info.signatures ?: return ""
-                if (sigs.isEmpty()) return ""
-                sigs[0].toByteArray()
-            }
-            val digest = MessageDigest.getInstance("SHA-256").digest(certBytes)
-            digest.joinToString("") { "%02x".format(it) }
-        } catch (e: Throwable) {
-            ""
-        }
-    }
-
-    /** 弹出公告卡片（白色卡片 + 蓝色主题，跟随整体 UI）。点确认后关闭。 */
     fun showNoticeCard(activity: Activity, notice: Notice, onConfirm: () -> Unit) {
         if (activity.isFinishing || activity.isDestroyed) return
         val density = activity.resources.displayMetrics.density
