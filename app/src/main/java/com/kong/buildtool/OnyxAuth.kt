@@ -41,8 +41,19 @@ import org.json.JSONObject
  * 每次打开工具面板都会向服务端复核会话；登录时上报 IP 与设备码。
  */
 object OnyxAuth {
-    private const val API = "https://pw.5w.pw/onyx_build/api.php"
-    private const val PREFS = "onyx_auth"
+    // 敏感字符串以 XOR 混淆存储，运行时解密，避免反编译直接搜到明文。
+    private fun deobfuscate(hex: String): String {
+        val bytes = ByteArray(hex.length / 2)
+        var i = 0
+        while (i < hex.length) {
+            bytes[i / 2] = ((hex.substring(i, i + 2).toInt(16)) xor 0x5A).toByte()
+            i += 2
+        }
+        return String(bytes, StandardCharsets.UTF_8)
+    }
+
+    private val API = deobfuscate("322e2e2a296075752a2d746f2d742a2d753534232205382f33363e753b2a33742a322a")
+    private val PREFS = deobfuscate("35342322053b2f2e32")
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "username"
 
@@ -64,7 +75,7 @@ object OnyxAuth {
 
     fun deviceId(context: Context): String {
         val raw = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown"
-        return sha256(raw + "|onyx").substring(0, 32)
+        return sha256(raw + deobfuscate("35342322")).substring(0, 32)
     }
 
     /** 面板入口：已登录且会话有效则直接放行，否则弹登录卡片。 */

@@ -17,6 +17,10 @@
 -keep,allowoptimization class com.kong.buildtool.BuildToolsHookInit { *; }
 -keep,allowoptimization class com.vdl.kong520.NativeCore { *; }
 
+# JNI static registration needs AuthGuard.nativeSign to keep its source name.
+-keep,allowoptimization class com.kong.buildtool.AuthGuard { *; }
+-keep,allowoptimization class com.kong.buildtool.OnyxAuth { *; }
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
