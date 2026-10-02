@@ -1,5 +1,4 @@
 [onyx_build][onyx_1.0]
-hash=0e377f41dbd6627e68bf112b233ee8b3753f31b30596396f8a85b47129b30b3a
 你们好
 我是贝利亚
 欢迎使用 Onyx_build

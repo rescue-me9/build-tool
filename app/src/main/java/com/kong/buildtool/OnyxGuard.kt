@@ -18,13 +18,10 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
-import java.util.zip.ZipFile
 
 object OnyxGuard {
     private const val APP_KEY = "onyx_1.0"
@@ -36,7 +33,6 @@ object OnyxGuard {
 
     class Notice(
         val title: String,
-        val apkHash: String,
         val lines: List<String>
     )
 
@@ -63,41 +59,7 @@ object OnyxGuard {
         val raw = fetchNoticeText()
         val notice = parseNotice(raw)
         if (notice.title != TAG_TITLE) throw SecurityException("bad title")
-        if (notice.apkHash.isNotEmpty()) {
-            val localHash = apkSha256()
-            if (localHash.isEmpty()) {
-                android.util.Log.w("OnyxGuard", "skip apk hash check: cannot read apk")
-            } else if (localHash != notice.apkHash) {
-                throw SecurityException("apk hash mismatch")
-            }
-        }
         return notice
-    }
-
-    private fun apkSha256(): String {
-        return try {
-            val location = OnyxGuard::class.java.protectionDomain?.codeSource?.location ?: return ""
-            val file = File(location.path)
-            if (!file.isFile) return ""
-            val digest = MessageDigest.getInstance("SHA-256")
-            val entries = listOf("classes.dex", "resources.arsc", "AndroidManifest.xml")
-            ZipFile(file).use { zip ->
-                for (name in entries) {
-                    val entry = zip.getEntry(name) ?: return ""
-                    zip.getInputStream(entry).use { input ->
-                        val buffer = ByteArray(64 * 1024)
-                        while (true) {
-                            val read = input.read(buffer)
-                            if (read < 0) break
-                            digest.update(buffer, 0, read)
-                        }
-                    }
-                }
-            }
-            digest.digest().joinToString("") { "%02x".format(it) }
-        } catch (e: Throwable) {
-            ""
-        }
     }
 
     private fun fetchNoticeText(): String {
@@ -124,18 +86,12 @@ object OnyxGuard {
         val key = rest.substring(1, keyEnd).trim()
         if (key != APP_KEY) throw SecurityException("key mismatch")
         val body = rest.substring(keyEnd + 1).trimStart('\n', ' ')
-        var apkHash = ""
         val lines = mutableListOf<String>()
         for (line in body.split("\n")) {
             val trim = line.trim()
-            if (trim.isEmpty()) continue
-            if (trim.startsWith("hash=")) {
-                apkHash = trim.substringAfter('=').trim()
-            } else {
-                lines.add(trim)
-            }
+            if (trim.isNotEmpty()) lines.add(trim)
         }
-        return Notice(TAG_TITLE, apkHash, lines)
+        return Notice(TAG_TITLE, lines)
     }
 
     fun showNoticeCard(activity: Activity, notice: Notice, onConfirm: () -> Unit) {
