@@ -19,12 +19,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import java.io.BufferedReader
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.zip.ZipFile
 
 object OnyxGuard {
     private const val APP_KEY = "onyx_1.0"
@@ -80,12 +80,18 @@ object OnyxGuard {
             val file = File(location.path)
             if (!file.isFile) return ""
             val digest = MessageDigest.getInstance("SHA-256")
-            FileInputStream(file).use { input ->
-                val buffer = ByteArray(64 * 1024)
-                while (true) {
-                    val read = input.read(buffer)
-                    if (read < 0) break
-                    digest.update(buffer, 0, read)
+            val entries = listOf("classes.dex", "resources.arsc", "AndroidManifest.xml")
+            ZipFile(file).use { zip ->
+                for (name in entries) {
+                    val entry = zip.getEntry(name) ?: return ""
+                    zip.getInputStream(entry).use { input ->
+                        val buffer = ByteArray(64 * 1024)
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read < 0) break
+                            digest.update(buffer, 0, read)
+                        }
+                    }
                 }
             }
             digest.digest().joinToString("") { "%02x".format(it) }
