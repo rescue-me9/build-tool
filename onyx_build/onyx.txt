@@ -1,0 +1,7 @@
+[onyx_build]
+version=1.0
+fingerprint=REPLACE_WITH_APK_SIGNATURE_SHA256
+
+你们好
+我是贝利亚
+欢迎使用 Onyx_build

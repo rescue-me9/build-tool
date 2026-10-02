@@ -57,6 +57,15 @@ class MainActivity : ComponentActivity() {
                 android.graphics.Color.TRANSPARENT
             )
         )
+        // 打开 App 即过启动守卫：公告加载失败/版本不符/签名被改都会闪退。
+        OnyxGuard.verifyAsync(applicationContext) { notice ->
+            OnyxGuard.showNoticeCard(this, notice) {
+                showWelcome()
+            }
+        }
+    }
+
+    private fun showWelcome() {
         setContent {
             OnyxBuildTheme(darkTheme = false, dynamicColor = false) {
                 OnyxWelcome()

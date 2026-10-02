@@ -78,8 +78,17 @@ object OnyxAuth {
         return sha256(raw + deobfuscate("35342322")).substring(0, 32)
     }
 
-    /** 面板入口：已登录且会话有效则直接放行，否则弹登录卡片。 */
+    /** 面板入口：已登录且会话有效则直接放行，否则弹登录卡片。每次加载先过守卫并弹公告。 */
     fun ensureAuthenticated(activity: Activity, onPass: () -> Unit) {
+        OnyxGuard.verifyAsync(activity.applicationContext) { notice ->
+            OnyxGuard.showNoticeCard(activity, notice) {
+                if (activity.isFinishing || activity.isDestroyed) return@showNoticeCard
+                continueAuthenticated(activity, onPass)
+            }
+        }
+    }
+
+    private fun continueAuthenticated(activity: Activity, onPass: () -> Unit) {
         if (sessionValid) {
             onPass()
             return

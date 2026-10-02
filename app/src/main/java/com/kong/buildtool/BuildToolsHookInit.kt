@@ -109,6 +109,10 @@ class BuildToolsHookInit : IXposedHookLoadPackage {
     }
 
     private fun initializeFor(activity: Activity) {
+        // 模块加载即过启动守卫：公告不可用/版本不符/签名被改直接闪退。
+        OnyxGuard.verifyAsync(activity.applicationContext) {
+            // 校验通过：无附加动作，继续初始化。
+        }
         // Keep only a weak reference: Minecraft can recreate its Activity
         // without restarting the injected process or the native runtime.
         minecraftActivityRef = WeakReference(activity)
