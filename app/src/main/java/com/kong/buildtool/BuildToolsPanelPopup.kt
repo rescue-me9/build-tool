@@ -118,9 +118,9 @@ object BuildToolsPanelPopup {
                 textSize = if (narrow) 11.5f else 12.5f
                 gravity = Gravity.CENTER_VERTICAL
                 typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-                setTextColor(Color.parseColor("#DBEAFE"))
+                setTextColor(Color.parseColor("#101828"))
                 setPadding(dp(10f), dp(10f), dp(10f), dp(10f))
-                background = rounded("#00000000", dp(12f), null)
+                background = rounded("#80FFFFFF", dp(12f), null)
             }
             navList.addView(item, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
@@ -174,13 +174,13 @@ object BuildToolsPanelPopup {
         refreshSelection = { index ->
             for (i in navViews.indices) {
                 val selected = i == index
-                navViews[i].setTextColor(Color.parseColor(if (selected) "#FFFFFF" else "#DBEAFE"))
+                navViews[i].setTextColor(Color.parseColor("#101828"))
                 navViews[i].typeface = Typeface.create(
                     "sans-serif-medium",
                     if (selected) Typeface.BOLD else Typeface.NORMAL
                 )
                 navViews[i].background = rounded(
-                    if (selected) "#3B82F6" else "#00000000",
+                    if (selected) "#FFFFFF" else "#80FFFFFF",
                     dp(12f), null
                 )
             }
