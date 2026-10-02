@@ -3,16 +3,10 @@ package com.kong.buildtool
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorFilter
-import android.graphics.Paint
-import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -25,7 +19,6 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import java.io.BufferedReader
@@ -37,7 +30,7 @@ import java.security.MessageDigest
 import org.json.JSONObject
 
 /**
- * Onyx_build 登录门禁。卡片风格与工具面板一致（白蓝主题）。
+ * Onyx_build 登录门禁。白色卡片 + 蓝色主题，与工具面板同风格。
  * 每次打开工具面板都会向服务端复核会话；登录时上报 IP 与设备码。
  */
 object OnyxAuth {
@@ -46,18 +39,17 @@ object OnyxAuth {
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "username"
 
-    // 白蓝主题
-    private const val PAPER = "#F6F9FE"
+    // 白色卡片 + 蓝色主题
     private const val SURFACE = "#FFFFFF"
-    private const val INK = "#1B2735"
-    private const val MUTED = "#6B7A90"
-    private const val LINE = "#D8E2F0"
-    private const val BLUE = "#2E6FD8"
-    private const val BLUE_DEEP = "#1F4FA8"
-    private const val BLUE_SOFT = "#E4EEFC"
-    private const val RED = "#C4453A"
-    private const val RED_SOFT = "#FBEAE8"
-    private const val GREEN = "#2F7D5B"
+    private const val INK = "#101828"
+    private const val MUTED = "#667085"
+    private const val LINE = "#DDE3EC"
+    private const val BLUE = "#2563EB"
+    private const val BLUE_DEEP = "#1E40AF"
+    private const val BLUE_SOFT = "#EFF6FF"
+    private const val RED = "#DC2626"
+    private const val RED_SOFT = "#FEF2F2"
+    private const val GREEN = "#16A34A"
 
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var sessionValid = false
@@ -105,41 +97,63 @@ object OnyxAuth {
         val dialog = Dialog(activity).apply { requestWindowFeature(Window.FEATURE_NO_TITLE) }
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(22f), dp(20f), dp(22f), dp(18f))
-            background = rounded(SURFACE, dp(20f), LINE)
+            background = rounded(SURFACE, dp(26f), LINE)
         }
 
-        root.addView(TextView(activity).apply {
-            text = "ONYX_BUILD"
-            textSize = 9f
-            letterSpacing = .16f
-            typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextColor(Color.parseColor(BLUE))
-        })
-        root.addView(TextView(activity).apply {
-            text = "登录 Onyx_build 以使用"
-            textSize = 19f
-            typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextColor(Color.parseColor(INK))
-        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            topMargin = dp(4f)
-        })
-        root.addView(TextView(activity).apply {
-            text = "账号与设备绑定，首次登录后仅可在当前设备使用"
-            textSize = 11f
-            setTextColor(Color.parseColor(MUTED))
-        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            topMargin = dp(3f)
-        })
+        // 深蓝渐变头部
+        root.addView(LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(26f), dp(28f), dp(26f), dp(24f))
+            background = GradientDrawable().apply {
+                colors = intArrayOf(Color.parseColor("#1E40AF"), Color.parseColor("#2563EB"))
+                orientation = GradientDrawable.Orientation.TL_BR
+                cornerRadii = floatArrayOf(
+                    dp(26f).toFloat(), dp(26f).toFloat(),
+                    dp(26f).toFloat(), dp(26f).toFloat(),
+                    0f, 0f, 0f, 0f
+                )
+            }
+            addView(TextView(activity).apply {
+                text = "ONYX_BUILD"
+                textSize = 10f
+                letterSpacing = .2f
+                typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+                setTextColor(Color.parseColor("#BFDBFE"))
+            })
+            addView(TextView(activity).apply {
+                text = "登录 Onyx_build 以使用"
+                textSize = 20f
+                typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+                setTextColor(Color.WHITE)
+            }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(6f) })
+            addView(TextView(activity).apply {
+                text = "账号与设备绑定，首次登录后仅可在当前设备使用"
+                textSize = 11.5f
+                setTextColor(Color.parseColor("#DBEAFE"))
+            }, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(4f) })
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+        // 白色表单区
+        val formArea = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(26f), dp(20f), dp(26f), dp(22f))
+        }
+        root.addView(formArea, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
 
         val noticeView = TextView(activity).apply {
-            textSize = 11.5f
+            textSize = 12f
             visibility = View.GONE
             setPadding(dp(10f), dp(8f), dp(10f), dp(8f))
         }
-        root.addView(noticeView, LinearLayout.LayoutParams(
+        formArea.addView(noticeView, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply { topMargin = dp(12f) })
+        ))
 
         fun notice(text: String, error: Boolean) {
             noticeView.text = text
@@ -147,43 +161,59 @@ object OnyxAuth {
             noticeView.background = rounded(if (error) RED_SOFT else BLUE_SOFT, dp(10f), null)
             noticeView.visibility = View.VISIBLE
         }
-        if (notice != null) notice(notice, true)
+        if (notice != null) {
+            notice(notice, true)
+        } else {
+            formArea.addView(View(activity), LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(2f)
+            ))
+        }
 
         val userInput = field(activity, { v -> dp(v) }, "账号", false)
         val passInput = field(activity, { v -> dp(v) }, "密码", true)
-        root.addView(userInput.first, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(44f)
+        formArea.addView(userInput.first, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(48f)
         ).apply { topMargin = dp(14f) })
-        root.addView(passInput.first, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(44f)
-        ).apply { topMargin = dp(9f) })
+        formArea.addView(passInput.first, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(48f)
+        ).apply { topMargin = dp(10f) })
 
         val loginButton = Button(activity).apply {
             text = "登 录"
-            textSize = 14f
+            textSize = 15f
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             isAllCaps = false
             stateListAnimator = null
             setTextColor(Color.WHITE)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor(BLUE))
-                cornerRadius = dp(12f).toFloat()
+                colors = intArrayOf(Color.parseColor("#2563EB"), Color.parseColor("#1D4ED8"))
+                orientation = GradientDrawable.Orientation.TOP_BOTTOM
+                cornerRadius = dp(14f).toFloat()
             }
         }
-        root.addView(loginButton, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(46f)
-        ).apply { topMargin = dp(16f) })
+        formArea.addView(loginButton, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(50f)
+        ).apply { topMargin = dp(18f) })
 
-        root.addView(TextView(activity).apply {
+        formArea.addView(TextView(activity).apply {
             text = "欲买桂花同载酒，终不似，少年游。"
-            textSize = 9.5f
+            textSize = 10f
             gravity = Gravity.CENTER
             setTextColor(Color.parseColor(MUTED))
-        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            topMargin = dp(10f)
-        })
+        }, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply { topMargin = dp(14f) })
+        formArea.addView(TextView(activity).apply {
+            text = "— By 萌面雕 —"
+            textSize = 9.5f
+            letterSpacing = .12f
+            gravity = Gravity.CENTER
+            setTextColor(Color.parseColor(BLUE))
+        }, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply { topMargin = dp(4f) })
 
-        val panelWidth = minOf(dp(360f), (activity.resources.displayMetrics.widthPixels * .9f).toInt())
+        val panelWidth = minOf(dp(384f), (activity.resources.displayMetrics.widthPixels * .92f).toInt())
         dialog.setContentView(root)
         dialog.setOnDismissListener { loginButton.isEnabled = true }
         dialog.show()
@@ -238,12 +268,12 @@ object OnyxAuth {
         val box = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = rounded(PAPER, dp(12f), LINE)
-            setPadding(dp(13f), 0, dp(13f), 0)
+            background = rounded("#F5F7FA", dp(14f), LINE)
+            setPadding(dp(14f), 0, dp(14f), 0)
         }
         val edit = EditText(activity).apply {
             this.hint = hint
-            textSize = 13.5f
+            textSize = 14f
             setTextColor(Color.parseColor(INK))
             setHintTextColor(Color.parseColor(MUTED))
             background = null

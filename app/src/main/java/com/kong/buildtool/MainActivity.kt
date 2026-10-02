@@ -21,9 +21,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,43 +68,65 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun OnyxWelcome() {
     val context = LocalContext.current
-    val ink = Color(0xFF1B2735)
-    val muted = Color(0xFF6B7A90)
-    val blue = Color(0xFF2E6FD8)
-    val blueDeep = Color(0xFF1F4FA8)
+    val ink = Color(0xFF101828)
+    val muted = Color(0xFF667085)
+    val blue = Color(0xFF2563EB)
+    val blueDeep = Color(0xFF1E40AF)
 
-    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF3F7FD)) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF4F6FA)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 48.dp),
+                .padding(horizontal = 24.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Column(modifier = Modifier.widthIn(max = 460.dp)) {
-                // 顶部标识
-                Text(
-                    text = "ONYX_BUILD",
-                    color = blue,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.5.sp,
-                    style = MaterialTheme.typography.labelMedium
-                )
+            Column(modifier = Modifier.widthIn(max = 480.dp)) {
+                // 顶部蓝色形象区
+                Surface(
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(22.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.linearGradient(listOf(blueDeep, blue)),
+                                RoundedCornerShape(22.dp)
+                            )
+                            .padding(horizontal = 24.dp, vertical = 28.dp)
+                    ) {
+                        Text(
+                            text = "ONYX_BUILD",
+                            color = Color(0xFFBFDBFE),
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.5.sp,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "欢迎使用 Onyx_Build",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "为建筑创作准备的导入、投影与导出工具。",
+                            color = Color(0xFFDBEAFE),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "欢迎使用Onyx_Build",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = ink
-                )
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = "为建筑创作准备的导入、投影与导出工具。请通过 XP/LSPosed 加载到游戏后使用。",
+                    text = "请通过 XP/LSPosed 加载到游戏后使用。",
                     color = muted,
-                    style = MaterialTheme.typography.bodyLarge
+                    fontSize = 12.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-                Spacer(Modifier.height(26.dp))
+                Spacer(Modifier.height(22.dp))
 
                 // 加入官方服务器按钮
                 Button(
@@ -140,9 +161,9 @@ private fun OnyxWelcome() {
 
                 // Q 群提示卡片
                 Surface(
-                    color = Color(0xFFE4EEFC),
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Color(0xFFC9DCF6))
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0xFFE4E7EC))
                 ) {
                     Row(
                         modifier = Modifier
@@ -152,10 +173,10 @@ private fun OnyxWelcome() {
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(40.dp)
                                 .background(
-                                    Brush.linearGradient(listOf(blue, blueDeep)),
-                                    RoundedCornerShape(10.dp)
+                                    Brush.linearGradient(listOf(blueDeep, blue)),
+                                    RoundedCornerShape(12.dp)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -178,7 +199,14 @@ private fun OnyxWelcome() {
                         }
                     }
                 }
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(18.dp))
+                Text(
+                    text = "— By 萌面雕 —",
+                    color = blue,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }

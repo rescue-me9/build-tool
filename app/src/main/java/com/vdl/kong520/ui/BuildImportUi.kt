@@ -37,15 +37,15 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** Shared resumable import surface rendered as separate structure and pixel-art screens. */
 object BuildImportUi {
-    private const val UI_BG = "#F6F9FE"
-    private const val UI_SURFACE = "#EDF3FC"
-    private const val UI_ACCENT = "#2E6FD8"
-    private const val UI_ACCENT_DARK = "#1F4FA8"
-    private const val UI_ACCENT_SOFT = "#E4EEFC"
-    private const val UI_INK = "#1B2735"
-    private const val UI_MUTED = "#6B7A90"
-    private const val UI_LINE = "#D8E2F0"
-    private const val UI_GREEN = "#2F7D5B"
+    private const val UI_BG = "#F4F6FA"
+    private const val UI_SURFACE = "#FFFFFF"
+    private const val UI_ACCENT = "#2563EB"
+    private const val UI_ACCENT_DARK = "#1E40AF"
+    private const val UI_ACCENT_SOFT = "#EFF6FF"
+    private const val UI_INK = "#101828"
+    private const val UI_MUTED = "#667085"
+    private const val UI_LINE = "#E4E7EC"
+    private const val UI_GREEN = "#16A34A"
 
     private data class DetectedWorldContext(
         val worldId: String,

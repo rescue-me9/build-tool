@@ -36,14 +36,14 @@ import java.util.concurrent.atomic.AtomicReference
 
 /** Standalone native controls for loading and displaying a building projection. */
 object BuildProjectionUi {
-    private const val BG = "#F6F9FE"
-    private const val SURFACE = "#EDF3FC"
-    private const val ACCENT = "#2E6FD8"
-    private const val ACCENT_DARK = "#1F4FA8"
-    private const val INK = "#1B2735"
-    private const val MUTED = "#6B7A90"
-    private const val LINE = "#D8E2F0"
-    private const val GREEN = "#2F7D5B"
+    private const val BG = "#F4F6FA"
+    private const val SURFACE = "#FFFFFF"
+    private const val ACCENT = "#2563EB"
+    private const val ACCENT_DARK = "#1E40AF"
+    private const val INK = "#101828"
+    private const val MUTED = "#667085"
+    private const val LINE = "#E4E7EC"
+    private const val GREEN = "#16A34A"
 
     private const val PREFS = "build_projection_ui"
     private const val KEY_ENABLED = "enabled"

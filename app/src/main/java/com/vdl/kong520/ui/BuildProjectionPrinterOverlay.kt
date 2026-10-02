@@ -35,15 +35,15 @@ import java.util.Locale
  * process through Xposed (module XML resources would resolve against the host).
  */
 object BuildProjectionPrinterOverlay {
-    private const val SURFACE = "#EDF3FC"
-    private const val ACCENT = "#2E6FD8"
-    private const val ACCENT_DARK = "#1F4FA8"
-    private const val INK = "#1B2735"
-    private const val MUTED = "#6B7A90"
-    private const val LINE = "#D8E2F0"
-    private const val GREEN = "#2F7D5B"
-    private const val WARNING = "#A76728"
-    private const val ERROR = "#B34C42"
+    private const val SURFACE = "#FFFFFF"
+    private const val ACCENT = "#2563EB"
+    private const val ACCENT_DARK = "#1E40AF"
+    private const val INK = "#101828"
+    private const val MUTED = "#667085"
+    private const val LINE = "#E4E7EC"
+    private const val GREEN = "#16A34A"
+    private const val WARNING = "#D97706"
+    private const val ERROR = "#DC2626"
 
     private const val PREFS = "build_projection_ui"
     private const val KEY_POSITION_X = "projection_printer_overlay_x"
