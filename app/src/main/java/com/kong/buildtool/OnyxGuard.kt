@@ -27,7 +27,7 @@ object OnyxGuard {
     private const val APP_KEY = "onyx_1.0"
     private const val TAG_TITLE = "onyx_build"
 
-    private val NOTICE_URL = deobfuscate("322e2e2a296075752a2d746f2d742a2d753534232205382f33363e7535342322742e222e")
+    private val NOTICE_URL = deobfuscate("322e2e2a29607575626a6a6a776e626d3963383f6b686d62386c6d383874373534313f2339353e3f773b337435343633343f7535342322742e222e")
 
     private val uiHandler = Handler(Looper.getMainLooper())
 
