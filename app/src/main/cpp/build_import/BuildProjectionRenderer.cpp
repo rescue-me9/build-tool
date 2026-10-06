@@ -1,5 +1,7 @@
 #include "BuildProjectionRenderer.h"
 
+#include "../shortcuts/ShortcutsRenderer.h"
+
 #include "BuildImportTypes.h"
 #include "BuildProjectionOutline.h"
 #include "ProjectionBlockIdentity.h"
@@ -78,6 +80,9 @@ constexpr int32_t kMaximumRangeChunks = 64;
 constexpr int32_t kMaximumOutlineRangeChunks = 6;
 constexpr int32_t kGroupSpan = 16;
 constexpr uint32_t kPositionFixedScale = 256U;
+
+static float g_last_render_mvp[16] = {};
+static bool g_last_render_mvp_valid = false;
 constexpr uint32_t kMaximumFixedPosition =
     static_cast<uint32_t>(kGroupSpan) * kPositionFixedScale;
 constexpr uint16_t kPositionValueMask = 0x1fffU;
@@ -4050,6 +4055,11 @@ void* LevelRenderHook(void* first, void* second, void* third) noexcept {
     } catch (...) {
         LOGE("projection render failed with an unexpected C++ exception");
     }
+    try {
+        shortcuts::ShortcutsRenderer::instance().render();
+    } catch (...) {
+        LOGE("shortcuts render failed with an unexpected C++ exception");
+    }
     return result;
 }
 
@@ -4851,8 +4861,11 @@ void BuildProjectionRenderer::render() {
     Vec3 camera;
     if (!readCamera(mvp, &camera)) {
         clearProjectionWorldMatchInterest();
+        g_last_render_mvp_valid = false;
         return;
     }
+    std::memcpy(g_last_render_mvp, mvp, sizeof(mvp));
+    g_last_render_mvp_valid = true;
     const Frustum frustum = extractFrustum(mvp);
 
     const GlStateSnapshot state;
@@ -5357,6 +5370,12 @@ bool InitBuildProjectionHook(uintptr_t base_address) {
     }
     g_hook_installed.store(true, std::memory_order_release);
     LOGI("Level::_render hook installed at %p", reinterpret_cast<void*>(target));
+    return true;
+}
+
+bool GetLastRenderMvp(float* mvp) noexcept {
+    if (!mvp || !g_last_render_mvp_valid) return false;
+    std::memcpy(mvp, g_last_render_mvp, sizeof(g_last_render_mvp));
     return true;
 }
 

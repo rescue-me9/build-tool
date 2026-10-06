@@ -29,6 +29,11 @@ object BuildToolsPanelPopup {
     )
 
     private val tools = listOf(
+        ToolEntry(BuildToolsLauncher.Tool.SHORTCUTS, "快捷方式", "实用快捷功能合集", listOf(
+            "自动搭路 / 建塔 / 楼梯 / 清障",
+            "自动喂食 / 拾取 / 安全穹顶",
+            "坐标HUD / 轨迹 / 区块边界"
+        )),
         ToolEntry(BuildToolsLauncher.Tool.IMPORT, "建筑导入", "导入建筑模型文件", listOf(
             "支持 BDX / Litematic / Schematic 格式",
             "可设置放置速度与坐标偏移",

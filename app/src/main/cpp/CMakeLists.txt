@@ -151,6 +151,9 @@ add_library(
         tp/MinecraftUpdateHook.cpp
         tp/BuildPacketReceiveHook.cpp
         tp/LoopbackPacketSenderCapture.cpp
+        shortcuts/ShortcutsRuntime.cpp
+        shortcuts/ShortcutsRenderer.cpp
+        shortcuts/ShortcutsModule.cpp
         ${SRC}
 )
 

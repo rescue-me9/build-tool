@@ -8,10 +8,11 @@ import com.vdl.kong520.ui.BuildExportUi
 import com.vdl.kong520.ui.BuildImportUi
 import com.vdl.kong520.ui.BuildProjectionUi
 import com.vdl.kong520.ui.PixelArtImportUi
+import com.vdl.kong520.ui.ShortcutsUi
 
 /** Entry point for the building tools in the injected game process. */
 object BuildToolsLauncher {
-    enum class Tool { IMPORT, PIXEL_ART, PROJECTION, EXPORT }
+    enum class Tool { SHORTCUTS, IMPORT, PIXEL_ART, PROJECTION, EXPORT }
 
     fun openPanel(activity: Activity) {
         openWhenReady(activity) { OnyxAuth.ensureAuthenticated(activity) { BuildToolsPanelPopup.show(activity) } }
@@ -41,6 +42,7 @@ object BuildToolsLauncher {
 
     private fun showTool(activity: Activity, tool: Tool) {
         when (tool) {
+            Tool.SHORTCUTS -> ShortcutsUi.show(activity)
             Tool.IMPORT -> BuildImportUi.show(activity, activity.applicationContext)
             Tool.PIXEL_ART -> PixelArtImportUi.show(activity, activity.applicationContext)
             Tool.PROJECTION -> BuildProjectionUi.show(activity, activity.applicationContext)

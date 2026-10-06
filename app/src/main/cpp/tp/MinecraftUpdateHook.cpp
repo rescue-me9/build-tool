@@ -1,4 +1,5 @@
 #include "MinecraftUpdateHook.h"
+#include "../shortcuts/ShortcutsRuntime.h"
 #include "../build_import/MapAnvilDebugBridge.h"
 #include "PythonUtils.h"
 #include "FunctionsAddress.h"
@@ -601,6 +602,24 @@ static void Actor_normalTick_Hook(void* actor) {
             if (!projection_match_runtime_exception_logged) {
                 LOGE("ProjectionWorldMatchRuntime::onGameTick unknown exception contained");
                 projection_match_runtime_exception_logged = true;
+            }
+        }
+    }
+
+    {
+        static bool shortcuts_exception_logged = false;
+        try {
+            shortcuts::ShortcutsRuntime::instance().onGameTick();
+            shortcuts_exception_logged = false;
+        } catch (const std::exception& error) {
+            if (!shortcuts_exception_logged) {
+                LOGE("ShortcutsRuntime::onGameTick exception contained: %s", error.what());
+                shortcuts_exception_logged = true;
+            }
+        } catch (...) {
+            if (!shortcuts_exception_logged) {
+                LOGE("ShortcutsRuntime::onGameTick unknown exception contained");
+                shortcuts_exception_logged = true;
             }
         }
     }

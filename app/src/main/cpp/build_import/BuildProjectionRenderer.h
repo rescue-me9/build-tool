@@ -226,6 +226,7 @@ bool InitBuildProjectionHook(uintptr_t base_address);
 // can use it as a safe native fallback when the embedded Python bridge is not
 // available after a game update.
 bool GetLatestBuildRenderCameraPosition(float* x, float* y, float* z) noexcept;
+bool GetLastRenderMvp(float* mvp) noexcept;
 
 }  // namespace build_import
 

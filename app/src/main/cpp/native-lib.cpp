@@ -21,6 +21,8 @@
 #include "build_import/MapAnvilUiCloseBridge.h"
 #include "build_import/MapChestUiCloseBridge.h"
 
+extern bool RegisterShortcutsNatives(JNIEnv* env) noexcept;
+
 #define LOG_TAG "BuildToolsNative"
 
 std::atomic<uintptr_t> Main::baseAddress{0};
@@ -126,7 +128,8 @@ void waitForMinecraft() {
     LOGE("Minecraft library was not found");
 }
 
-void ensureBuildToolsHooks(JNIEnv*, jclass) {
+void ensureBuildToolsHooks(JNIEnv* env, jclass) {
+    if (env) RegisterShortcutsNatives(env);
     if (Main::getBaseAddress() == 0) {
         Main::setBaseAddress(getModuleBase("libminecraftpe.so"));
     }
