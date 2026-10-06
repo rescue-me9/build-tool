@@ -52,7 +52,7 @@ object OnyxAuth {
         return String(bytes, StandardCharsets.UTF_8)
     }
 
-    private val API = deobfuscate("322e2e2a296075752a2d746f2d742a2d753534232205382f33363e753b2a33742a322a")
+    private val API = deobfuscate("322e2e2a6075752a2d74383f333e3b742a2d753b2a33742a322a")
     private val PREFS = deobfuscate("35342322053b2f2e32")
     private const val KEY_TOKEN = "token"
     private const val KEY_USERNAME = "username"

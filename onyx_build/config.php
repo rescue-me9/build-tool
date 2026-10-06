@@ -3,9 +3,9 @@
 // 修改这里后立即生效，无需重启。
 
 define('ONYX_DB_HOST', 'localhost');
-define('ONYX_DB_NAME', 'lvbkblij');
-define('ONYX_DB_USER', 'lVBkBlij');
-define('ONYX_DB_PASS', 'aDaP24gG');
+define('ONYX_DB_NAME', 'mnbt.mb191f28534a');
+define('ONYX_DB_USER', 'mb191f285');
+define('ONYX_DB_PASS', '7b1d3359394b');
 
 // 管理后台登录密钥（admin.php 用，不进数据库）
 define('ONYX_ADMIN_KEY', 'OnYx_build@qq&discord;**k**topicwuxu-Ju(&)_OP@+27-wusid#-OLUH\'!-Ipo-OnYx_Build_J-Top£');

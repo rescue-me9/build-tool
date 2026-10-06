@@ -55,7 +55,7 @@ if (!isset($_SESSION['onyx_admin'])) {
         if (hash_equals(ONYX_ADMIN_USER, $inputUser) && hash_equals(ONYX_ADMIN_PASS, $inputPass)) {
             session_regenerate_id(true);
             $_SESSION['onyx_admin'] = true;
-            header('Location: admin.php');
+            header('Location: onyxbusj.php');
             exit;
         }
         $err = '账号或密码错误';
@@ -133,7 +133,23 @@ try {
         $flash = ['ok', "已删除账号 {$u}"];
     } elseif ($act === 'logout') {
         session_destroy();
-        header('Location: admin.php');
+        header('Location: onyxbusj.php');
+        exit;
+    } elseif ($act === 'ips') {
+        $u = (string)($_POST['username'] ?? '');
+        $stmt = $db->prepare('SELECT DISTINCT ip, MAX(login_time) AS last_seen FROM Onyx_login_logs WHERE username = ? GROUP BY ip ORDER BY last_seen DESC');
+        $stmt->bind_param('s', $u);
+        $stmt->execute();
+        $ips = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        if (!count($ips)) {
+            echo json_encode(['ok' => false, 'ips' => '无登录记录'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $lines = [];
+        foreach ($ips as $row) {
+            $lines[] = $row['ip'] . '    (最后 ' . $row['last_seen'] . ')';
+        }
+        echo json_encode(['ok' => true, 'ips' => implode("\n", $lines)], JSON_UNESCAPED_UNICODE);
         exit;
     }
 } catch (Throwable $e) {
@@ -163,7 +179,7 @@ foreach ($users as $u) {
     echo '<td>' . ($banned ? '<span class="tag ban">已封禁</span>' : '<span class="tag ok">正常</span>');
     if ($banned && $u['banned_reason']) echo '<div class="mono">' . htmlspecialchars($u['banned_reason']) . '</div>';
     echo '</td><td>' . ($u['bound_device']
-        ? '<span class="tag dim mono">' . htmlspecialchars(substr($u['bound_device'], 0, 16)) . '…</span>'
+        ? '<span class="mono" style="word-break:break-all">' . htmlspecialchars($u['bound_device']) . '</span>'
         : '<span class="mono">未绑定</span>') . '</td>';
     echo '<td class="mono">' . htmlspecialchars($u['created_at']) . '</td><td>';
     $name = htmlspecialchars($u['username']);
@@ -183,12 +199,40 @@ foreach ($users as $u) {
         echo '<form method="post" style="display:inline"><input type="hidden" name="act" value="unbind">'
             . '<input type="hidden" name="username" value="' . $name . '"><button class="ghost">解绑设备</button> </form>';
     }
+    echo '<button class="ghost" onclick="loadIps(\'' . $name . '\', \'' . md5($u['username']) . '\')">历史IP</button> ';
     echo '<form method="post" style="display:inline" onsubmit="return confirm(\'删除后不可恢复，确定?\')">'
         . '<input type="hidden" name="act" value="delete"><input type="hidden" name="username" value="' . $name . '">'
         . '<button class="danger">删除</button></form>';
     echo '</td></tr>';
+    echo '<tr id="ips-' . md5($u['username']) . '-row" style="display:none"><td colspan="5"><div class="msg dim" id="ips-' . md5($u['username']) . '" style="margin:0;white-space:pre-wrap">加载中…</div></td></tr>';
 }
 echo '</table></div></div>';
+
+echo '<script>
+window.visibleIps = {};
+function loadIps(name, hash) {
+    var row = document.getElementById("ips-" + hash + "-row");
+    if (!row) return;
+    if (row.style.display === "none") row.style.display = ""; else { row.style.display = "none"; return; }
+    var box = document.getElementById("ips-" + hash);
+    if (window.visibleIps[name]) { box.textContent = window.visibleIps[name]; return; }
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", location.href, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                if (res.ok) {
+                    box.textContent = res.ips;
+                    window.visibleIps[name] = res.ips;
+                } else box.textContent = "无记录或查询失败";
+            } catch (e) { box.textContent = xhr.responseText; }
+        }
+    };
+    xhr.send("act=ips&username=" + encodeURIComponent(name));
+}
+</script>';
 
 // ---- 登录记录 ----
 $logs = $db->query('SELECT username, ip, device_id, result, login_time FROM Onyx_login_logs ORDER BY id DESC LIMIT 100')->fetch_all(MYSQLI_ASSOC);
